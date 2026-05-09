@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tara Moving — Operations Control Center</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Oswald:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --sky:#3AABDC;--skyl:#5CC4EE;--skyp:#C5E8F5;
+  --navy:#0E1A45;--navym:#1A2A6C;--navyl:#243280;
+  --gold:#C9901A;--goldb:#E8B040;
+  --green:#22C55E;--red:#EF4444;--orange:#F97316;--purple:#8B5CF6;
+  --white:#fff;--off:#F4F6FA;--border:#E2E8F2;
+  --dark:#0E1A45;--mid:#3A4A7A;--muted:#8A9CC0;
+  --sidebar:240px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--off);color:var(--dark);overflow:hidden;}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar);background:var(--navy);
+  display:flex;flex-direction:column;flex-shrink:0;
+  overflow-y:auto;transition:width .3s;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;}
+.sb-logo-ico{font-size:26px;}
+.sb-logo-txt{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.5px;line-height:1.2;}
+.sb-logo-sub{font-size:9px;color:rgba(255,255,255,.35);letter-spacing:1px;}
+.sb-user{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:9px;}
+.sb-ava{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navym));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-uname{font-size:12px;font-weight:600;color:#fff;}
+.sb-urole{font-size:9px;color:rgba(255,255,255,.4);}
+.sb-status{display:inline-flex;align-items:center;gap:3px;background:rgba(34,197,94,.15);border-radius:10px;padding:1px 6px;font-size:8px;font-weight:600;color:var(--green);margin-top:2px;}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--green);}
+.sb-section{padding:14px 14px 6px;font-size:8px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.25);}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:all .2s;border-radius:0;position:relative;text-decoration:none;}
+.sb-item:hover{background:rgba(255,255,255,.06);}
+.sb-item.act{background:rgba(58,171,220,.15);border-right:3px solid var(--sky);}
+.sb-item.act .sb-ico{color:var(--sky);}
+.sb-item.act .sb-lbl{color:#fff;font-weight:600;}
+.sb-ico{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.sb-lbl{font-size:12px;color:rgba(255,255,255,.6);}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;border-radius:10px;padding:1px 6px;font-size:9px;font-weight:700;}
+.sb-badge-green{background:var(--green);}
+.sb-badge-gold{background:var(--gold);}
+
+/* ── MAIN ── */
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.main::-webkit-scrollbar{width:4px;}
+.main::-webkit-scrollbar-thumb{background:var(--border);}
+
+/* ── TOP BAR ── */
+.topbar{
+  background:#fff;border-bottom:1px solid var(--border);
+  padding:0 24px;height:58px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.tb-title{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--navy);}
+.tb-right{display:flex;align-items:center;gap:12px;}
+.tb-search{display:flex;align-items:center;gap:6px;background:var(--off);border:1px solid var(--border);border-radius:8px;padding:7px 12px;}
+.tb-search input{border:none;background:transparent;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--dark);width:180px;}
+.tb-btn{background:linear-gradient(135deg,var(--sky),var(--navym));color:#fff;border:none;border-radius:7px;padding:8px 16px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;}
+.tb-notif{width:36px;height:36px;border-radius:50%;background:var(--off);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;position:relative;}
+.notif-dot{position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid #fff;}
+
+/* ── PAGE CONTENT ── */
+.page{display:none;padding:24px;flex:1;}
+.page.on{display:block;}
+
+/* ── STAT CARDS ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.kpi{background:#fff;border-radius:12px;padding:18px 20px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.k-sky::before{background:linear-gradient(90deg,var(--sky),var(--skyl));}
+.kpi.k-green::before{background:linear-gradient(90deg,var(--green),#16A34A);}
+.kpi.k-gold::before{background:linear-gradient(90deg,var(--gold),var(--goldb));}
+.kpi.k-purple::before{background:linear-gradient(90deg,var(--purple),#7C3AED);}
+.kpi.k-red::before{background:linear-gradient(90deg,var(--red),#DC2626);}
+.kpi.k-navy::before{background:linear-gradient(90deg,var(--navy),var(--navym));}
+.kpi-icon{font-size:28px;margin-bottom:8px;}
+.kpi-num{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:var(--navy);line-height:1;}
+.kpi-lbl{font-size:12px;color:var(--muted);margin-top:3px;}
+.kpi-sub{font-size:11px;font-weight:600;margin-top:4px;}
+.kpi-sub.up{color:var(--green);}
+.kpi-sub.dn{color:var(--red);}
+
+/* ── SECTION HEADER ── */
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.sec-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);}
+.sec-action{font-size:12px;color:var(--sky);cursor:pointer;font-weight:600;}
+
+/* ── TABLE ── */
+.tbl-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
+.tbl-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.tbl-head h3{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);}
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 16px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--off);border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(58,171,220,.03);}
+tbody td{padding:11px 16px;font-size:13px;color:var(--dark);}
+.td-bold{font-weight:600;}
+.td-muted{color:var(--muted);font-size:12px;}
+
+/* ── BADGES ── */
+.badge{border-radius:20px;padding:3px 10px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:4px;}
+.b-green{background:rgba(34,197,94,.1);color:var(--green);}
+.b-sky{background:rgba(58,171,220,.12);color:var(--sky);}
+.b-orange{background:rgba(249,115,22,.1);color:var(--orange);}
+.b-red{background:rgba(239,68,68,.1);color:var(--red);}
+.b-purple{background:rgba(139,92,246,.1);color:var(--purple);}
+.b-gold{background:rgba(201,144,26,.1);color:var(--gold);}
+.b-navy{background:rgba(14,26,69,.08);color:var(--navym);}
+
+/* ── KANBAN ── */
+.kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.kb-col{background:var(--off);border-radius:12px;padding:12px;border:1px solid var(--border);}
+.kb-head{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.kb-count{background:#fff;border-radius:10px;padding:1px 8px;font-size:11px;color:var(--navy);font-weight:700;border:1px solid var(--border);}
+.kb-card{background:#fff;border-radius:9px;padding:11px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer;transition:all .2s;}
+.kb-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(14,26,69,.08);}
+.kb-card-id{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+.kb-card-name{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.kb-card-addr{font-size:10px;color:var(--mid);line-height:1.4;margin-bottom:6px;}
+.kb-card-meta{display:flex;gap:4px;flex-wrap:wrap;}
+.kb-tag{background:var(--off);border-radius:4px;padding:2px 6px;font-size:9px;color:var(--mid);}
+.kb-card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:7px;padding-top:7px;border-top:1px solid var(--border);}
+.kb-price{font-size:12px;font-weight:700;color:var(--navy);}
+.kb-team{font-size:9px;color:var(--muted);}
+
+/* ── LEADERBOARD ── */
+.lb-wrap{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:24px;}
+.lb-header{padding:16px 18px;background:linear-gradient(135deg,var(--navy),var(--navym));display:flex;justify-content:space-between;align-items:center;}
+.lb-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:700;color:#fff;letter-spacing:.5px;}
+.lb-sub{font-size:11px;color:rgba(255,255,255,.5);}
+.lb-tabs{display:flex;gap:6px;}
+.lb-tab{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.lb-tab.act{background:var(--sky);color:#fff;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);transition:background .15s;cursor:pointer;}
+.lb-row:last-child{border-bottom:none;}
+.lb-row:hover{background:var(--off);}
+.lb-rank{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+.rank-1{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff;box-shadow:0 3px 10px rgba(255,165,0,.4);}
+.rank-2{background:linear-gradient(135deg,#C0C0C0,#A8A8A8);color:#fff;}
+.rank-3{background:linear-gradient(135deg,#CD7F32,#B8650A);color:#fff;}
+.rank-other{background:var(--off);color:var(--muted);border:1px solid var(--border);}
+.lb-ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navym));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-name{font-size:13px;font-weight:700;color:var(--navy);}
+.lb-team{font-size:10px;color:var(--muted);}
+.lb-tier{display:inline-flex;align-items:center;gap:3px;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:700;margin-top:2px;}
+.tier-diamond{background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2);}
+.tier-gold{background:rgba(201,144,26,.1);color:var(--gold);border:1px solid rgba(201,144,26,.2);}
+.tier-silver{background:rgba(148,163,184,.1);color:#64748B;border:1px solid rgba(148,163,184,.2);}
+.tier-bronze{background:rgba(180,83,9,.1);color:#B45309;border:1px solid rgba(180,83,9,.2);}
+.lb-stats{text-align:right;}
+.lb-cuft{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--navy);}
+.lb-cuft-lbl{font-size:9px;color:var(--muted);}
+.lb-rating{font-size:10px;color:var(--gold);font-weight:600;}
+.lb-bar-wrap{flex:1;max-width:120px;}
+.lb-bar{height:5px;background:var(--off);border-radius:3px;overflow:hidden;}
+.lb-bar-fill{height:100%;background:linear-gradient(90deg,var(--sky),var(--navym));border-radius:3px;transition:width .5s ease;}
+
+/* ── DISPATCH MAP ── */
+.dispatch-grid{display:grid;grid-template-columns:1fr 320px;gap:16px;margin-bottom:24px;}
+.map-mock{background:linear-gradient(135deg,#1A3A5C,#0E2540);border-radius:12px;height:320px;position:relative;overflow:hidden;border:1px solid var(--border);}
+.map-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(58,171,220,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(58,171,220,.08) 1px,transparent 1px);background-size:30px 30px;}
+.map-truck{position:absolute;background:var(--sky);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;box-shadow:0 0 0 4px rgba(58,171,220,.25);animation:truckPulse 2s infinite;}
+@keyframes truckPulse{0%,100%{box-shadow:0 0 0 4px rgba(58,171,220,.25)}50%{box-shadow:0 0 0 8px rgba(58,171,220,.1)}}
+.map-label{position:absolute;background:rgba(14,26,69,.85);color:#fff;border-radius:5px;padding:2px 7px;font-size:9px;font-weight:600;white-space:nowrap;backdrop-filter:blur(4px);}
+.map-legend{position:absolute;bottom:12px;left:12px;background:rgba(14,26,69,.85);border-radius:8px;padding:8px 12px;backdrop-filter:blur(4px);}
+.ml-item{display:flex;align-items:center;gap:6px;font-size:10px;color:rgba(255,255,255,.7);margin-bottom:3px;}
+.ml-dot{width:8px;height:8px;border-radius:50%;}
+.active-jobs-list{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;}
+.ajl-head{padding:12px 14px;border-bottom:1px solid var(--border);font-family:'Oswald',sans-serif;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--navy);}
+.ajl-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s;}
+.ajl-item:last-child{border-bottom:none;}
+.ajl-item:hover{background:var(--off);}
+.aji-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.aji-id{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.aji-name{font-size:12px;font-weight:700;color:var(--navy);}
+.aji-addr{font-size:10px;color:var(--mid);line-height:1.4;}
+.aji-foot{display:flex;justify-content:space-between;margin-top:5px;}
+.aji-team{font-size:10px;color:var(--sky);font-weight:600;}
+.aji-status{font-size:10px;color:var(--green);}
+
+/* ── CONTRACT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+.modal-overlay.on{display:flex;}
+.modal{background:#fff;border-radius:16px;width:720px;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.3);}
+.modal::-webkit-scrollbar{width:4px;}
+.modal::-webkit-scrollbar-thumb{background:var(--border);}
+.modal-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:10;}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);}
+.modal-close{width:32px;height:32px;border-radius:50%;background:var(--off);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.modal-body{padding:24px;}
+.contract-header{text-align:center;margin-bottom:24px;padding-bottom:20px;border-bottom:2px solid var(--border);}
+.ch-logo{font-size:32px;margin-bottom:6px;}
+.ch-company{font-family:'Playfair Display',serif;font-size:22px;font-weight:900;color:var(--navy);}
+.ch-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.ch-title{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--sky);margin-top:12px;letter-spacing:1px;text-transform:uppercase;}
+.contract-section{margin-bottom:20px;}
+.cs-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--navy);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.cs-text{font-size:12px;color:var(--mid);line-height:1.8;}
+.cs-text strong{color:var(--navy);}
+.contract-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.cd-item{background:var(--off);border-radius:8px;padding:10px 12px;border:1px solid var(--border);}
+.cd-lbl{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.cd-val{font-size:13px;font-weight:600;color:var(--navy);}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;}
+.sig-box{border:1.5px solid var(--border);border-radius:10px;padding:14px;}
+.sig-lbl{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.sig-line{height:50px;border-bottom:1.5px solid var(--dark);display:flex;align-items:flex-end;padding-bottom:4px;font-size:13px;color:var(--muted);font-style:italic;}
+.sig-meta{font-size:10px;color:var(--muted);margin-top:5px;}
+.contract-disclaimer{background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);border-radius:8px;padding:12px;margin-top:16px;}
+.cd-disclaimer{font-size:11px;color:var(--mid);line-height:1.7;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;position:sticky;bottom:0;background:#fff;}
+.btn-modal{border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.btn-modal:hover{transform:translateY(-1px);}
+.btn-modal.primary{background:linear-gradient(135deg,var(--sky),var(--navym));color:#fff;box-shadow:0 4px 14px rgba(58,171,220,.3);}
+.btn-modal.secondary{background:var(--off);color:var(--navy);border:1px solid var(--border);}
+.btn-modal.gold{background:linear-gradient(135deg,var(--gold),#D4A020);color:#fff;}
+
+/* ── FORMS ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg.full{grid-column:1/-1;}
+.fg label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.fg input,.fg select,.fg textarea{border:1.5px solid var(--border);border-radius:7px;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--dark);outline:none;transition:all .2s;background:#fff;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(58,171,220,.1);}
+.fg textarea{resize:vertical;min-height:70px;}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:16px;}
+.card-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--navy);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+
+/* ── EMPLOYEE PROFILE ── */
+.emp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+.emp-card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;}
+.emp-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(14,26,69,.08);}
+.emp-card-top{background:linear-gradient(135deg,var(--navy),var(--navym));padding:16px;text-align:center;position:relative;}
+.emp-tier-badge{position:absolute;top:10px;right:10px;border-radius:8px;padding:3px 8px;font-size:9px;font-weight:700;}
+.emp-ava{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navym));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;margin:0 auto 8px;border:3px solid rgba(255,255,255,.3);}
+.emp-name{font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;color:#fff;}
+.emp-role{font-size:10px;color:rgba(255,255,255,.5);margin-top:1px;}
+.emp-card-body{padding:12px 14px;}
+.emp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.es{text-align:center;background:var(--off);border-radius:7px;padding:6px;}
+.es-n{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:var(--navy);}
+.es-l{font-size:8px;color:var(--muted);}
+.progress-bar{height:5px;background:var(--off);border-radius:3px;overflow:hidden;margin-bottom:5px;}
+.pb-fill{height:100%;border-radius:3px;transition:width .5s;}
+.pb-blue{background:linear-gradient(90deg,var(--sky),var(--navym));}
+.pb-gold{background:linear-gradient(90deg,var(--gold),var(--goldb));}
+.pb-green{background:linear-gradient(90deg,var(--green),#16A34A);}
+.emp-bar-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-bottom:8px;}
+
+/* ── REVIEWS MANAGER ── */
+.review-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;margin-bottom:10px;transition:all .2s;}
+.review-card:hover{box-shadow:0 4px 16px rgba(14,26,69,.07);}
+.rc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.rc-stars{color:var(--gold);font-size:13px;letter-spacing:1px;}
+.rc-text{font-size:13px;color:var(--mid);line-height:1.7;font-style:italic;margin-bottom:10px;}
+.rc-author{display:flex;align-items:center;gap:8px;}
+.rc-ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--navym));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;}
+.rc-name{font-size:12px;font-weight:600;color:var(--navy);}
+.rc-platform{font-size:10px;color:var(--muted);}
+.rc-actions{display:flex;gap:6px;margin-top:10px;}
+.rc-btn{border:none;border-radius:6px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;}
+.rc-btn:hover{transform:translateY(-1px);}
+.rc-approve{background:rgba(34,197,94,.1);color:var(--green);}
+.rc-publish{background:linear-gradient(135deg,var(--sky),var(--navym));color:#fff;}
+.rc-delete{background:rgba(239,68,68,.1);color:var(--red);}
+
+/* ── CLAIMS ── */
+.claim-card{background:#fff;border-radius:10px;border:1px solid var(--border);padding:14px;margin-bottom:10px;}
+.claim-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.claim-id{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.claim-client{font-size:14px;font-weight:700;color:var(--navy);}
+.claim-desc{font-size:13px;color:var(--mid);line-height:1.6;margin-bottom:10px;}
+.claim-actions{display:flex;gap:8px;}
+.ca-btn{border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.ca-resolve{background:linear-gradient(135deg,var(--green),#16A34A);color:#fff;}
+.ca-escalate{background:rgba(249,115,22,.1);color:var(--orange);}
+.ca-close{background:var(--off);color:var(--mid);border:1px solid var(--border);}
+
+/* ── ALERT BANNER ── */
+.alert-banner{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.alert-banner.warn{background:rgba(249,115,22,.08);border-color:rgba(249,115,22,.25);}
+.alert-banner.info{background:rgba(58,171,220,.08);border-color:rgba(58,171,220,.25);}
+.ab-ico{font-size:18px;}
+.ab-text{font-size:13px;color:var(--dark);}
+.ab-text b{color:var(--navy);}
+
+/* ── TOGGLE ── */
+.toggle-wrap{display:flex;align-items:center;gap:10px;}
+.toggle{width:40px;height:22px;border-radius:11px;background:var(--border);cursor:pointer;position:relative;transition:background .2s;}
+.toggle.on{background:var(--sky);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:21px;}
+.toggle-lbl{font-size:13px;color:var(--dark);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){.kpi-row{grid-template-columns:repeat(2,1fr);}
+.kanban{grid-template-columns:repeat(2,1fr);}
+.emp-grid{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ══ SIDEBAR ══ -->
+<div class="sidebar" id="sidebar">
+  <div class="sb-logo">
+    <span class="sb-logo-ico">🚛</span>
+    <div><div class="sb-logo-txt">TARA MOVING</div><div class="sb-logo-sub">OPERATIONS CENTER</div></div>
+  </div>
+  <div class="sb-user">
+    <div class="sb-ava">SA</div>
+    <div>
+      <div class="sb-uname">Sarah Admin</div>
+      <div class="sb-urole">Super Administrator</div>
+      <div class="sb-status"><span class="sb-dot"></span>Online</div>
+    </div>
+  </div>
+
+  <div class="sb-section">Main</div>
+  <div class="sb-item act" onclick="nav('dashboard',this)"><span class="sb-ico">📊</span><span class="sb-lbl">Dashboard</span></div>
+  <div class="sb-item" onclick="nav('dispatch',this)"><span class="sb-ico">🗺️</span><span class="sb-lbl">Live Dispatch</span><span class="sb-badge sb-badge-green">3</span></div>
+  <div class="sb-item" onclick="nav('jobs',this)"><span class="sb-ico">📋</span><span class="sb-lbl">Jobs / Orders</span><span class="sb-badge">8</span></div>
+  <div class="sb-item" onclick="nav('leads',this)"><span class="sb-ico">📥</span><span class="sb-lbl">Leads & CRM</span><span class="sb-badge sb-badge-gold">5</span></div>
+  <div class="sb-item" onclick="nav('contracts',this)"><span class="sb-ico">📄</span><span class="sb-lbl">Contracts / e-BOL</span></div>
+
+  <div class="sb-section">Operations</div>
+  <div class="sb-item" onclick="nav('employees',this)"><span class="sb-ico">👷</span><span class="sb-lbl">Employees</span></div>
+  <div class="sb-item" onclick="nav('leaderboard',this)"><span class="sb-ico">🏆</span><span class="sb-lbl">Leaderboard</span></div>
+  <div class="sb-item" onclick="nav('payments',this)"><span class="sb-ico">💳</span><span class="sb-lbl">Payments</span></div>
+  <div class="sb-item" onclick="nav('claims',this)"><span class="sb-ico">⚠️</span><span class="sb-lbl">Claims</span><span class="sb-badge">2</span></div>
+
+  <div class="sb-section">Marketing</div>
+  <div class="sb-item" onclick="nav('reviews',this)"><span class="sb-ico">⭐</span><span class="sb-lbl">Reviews Manager</span><span class="sb-badge sb-badge-green">12</span></div>
+  <div class="sb-item" onclick="nav('marketing',this)"><span class="sb-ico">📢</span><span class="sb-lbl">Promotions</span></div>
+  <div class="sb-item" onclick="nav('reports',this)"><span class="sb-ico">📈</span><span class="sb-lbl">Reports</span></div>
+
+  <div class="sb-section">System</div>
+  <div class="sb-item" onclick="nav('settings',this)"><span class="sb-ico">⚙️</span><span class="sb-lbl">Settings</span></div>
+  <div class="sb-item" onclick="showLogout()"><span class="sb-ico">🚪</span><span class="sb-lbl" style="color:rgba(239,68,68,.7);">Sign Out</span></div>
+</div>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="tb-title" id="pageTitle">Dashboard</div>
+    <div class="tb-right">
+      <div class="tb-search"><span>🔍</span><input type="text" placeholder="Search jobs, clients, employees..."/></div>
+      <button class="tb-btn" onclick="openNewJob()">+ New Job</button>
+      <div class="tb-notif" onclick="showAlert()">🔔<div class="notif-dot"></div></div>
+      <div class="sb-ava" style="width:36px;height:36px;font-size:13px;">SA</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD PAGE ══ -->
+  <div class="page on" id="page-dashboard">
+    <div class="alert-banner info">
+      <span class="ab-ico">📱</span>
+      <div class="ab-text"><b>3 active moves</b> in progress right now · Team Alpha (Kim HH), Team Beta (Lopez), Team Gamma (Wong Office)</div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi k-sky"><div class="kpi-icon">📋</div><div class="kpi-num">8</div><div class="kpi-lbl">Jobs Today</div><div class="kpi-sub up">↑ 2 from yesterday</div></div>
+      <div class="kpi k-green"><div class="kpi-icon">✅</div><div class="kpi-num">5</div><div class="kpi-lbl">Completed</div><div class="kpi-sub up">62.5% completion rate</div></div>
+      <div class="kpi k-gold"><div class="kpi-icon">💰</div><div class="kpi-num">$18,240</div><div class="kpi-lbl">Revenue Today</div><div class="kpi-sub up">↑ 14% vs avg</div></div>
+      <div class="kpi k-purple"><div class="kpi-icon">⭐</div><div class="kpi-num">4.92</div><div class="kpi-lbl">Avg Rating</div><div class="kpi-sub up">↑ from 4.88</div></div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi k-navy"><div class="kpi-icon">📦</div><div class="kpi-num">3,840</div><div class="kpi-lbl">Cu.Ft. Today</div><div class="kpi-sub up">↑ 8% from target</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">👷</div><div class="kpi-num">24</div><div class="kpi-lbl">Crew On Duty</div><div class="kpi-sub">6 teams active</div></div>
+      <div class="kpi k-green"><div class="kpi-icon">📥</div><div class="kpi-num">5</div><div class="kpi-lbl">New Leads</div><div class="kpi-sub up">2 from web form</div></div>
+      <div class="kpi k-red"><div class="kpi-icon">⚠️</div><div class="kpi-num">2</div><div class="kpi-lbl">Open Claims</div><div class="kpi-sub dn">Needs attention</div></div>
+    </div>
+
+    <div class="sec-head"><span class="sec-title">Today's Jobs — Kanban</span><span class="sec-action" onclick="nav('jobs',document.querySelector('[onclick*=jobs]'))">View All →</span></div>
+    <div class="kanban">
+      <div class="kb-col">
+        <div class="kb-head">Pending <span class="kb-count">2</span></div>
+        <div class="kb-card" onclick="openContract()">
+          <div class="kb-card-id">#TM-2901-D · 3:00 PM</div>
+          <div class="kb-card-name">Chen Household</div>
+          <div class="kb-card-addr">Flushing, Queens → Hoboken NJ</div>
+          <div class="kb-card-meta"><span class="kb-tag">🛏️ 2BR</span><span class="kb-tag">380 cu.ft.</span></div>
+          <div class="kb-card-foot"><span class="kb-price">$1,180</span><span class="kb-team">Unassigned</span></div>
+        </div>
+        <div class="kb-card"><div class="kb-card-id">#TM-2901-E · 5:00 PM</div><div class="kb-card-name">Marcus Storage</div><div class="kb-card-addr">Bronx → Tara Storage Facility</div><div class="kb-card-meta"><span class="kb-tag">📦 Storage</span><span class="kb-tag">200 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$450</span><span class="kb-team">Unassigned</span></div></div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head">Assigned <span class="kb-count">1</span></div>
+        <div class="kb-card"><div class="kb-card-id">#TM-2847-C · 4:00 PM</div><div class="kb-card-name">Castro Apartment</div><div class="kb-card-addr">Bronx → Newark NJ</div><div class="kb-card-meta"><span class="kb-tag">🛏️ 1BR</span><span class="kb-tag">340 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$950</span><span class="kb-team">Team Delta · FRM-4</span></div></div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head">In Progress <span class="kb-count">3</span></div>
+        <div class="kb-card" style="border-left:3px solid var(--sky);">
+          <div class="kb-card-id">#TM-2847-B · 12:00 PM</div>
+          <div class="kb-card-name">Kim Household</div>
+          <div class="kb-card-addr">UWS → Jersey City NJ</div>
+          <div class="kb-card-meta"><span class="kb-tag">🛏️ 3BR</span><span class="kb-tag">🎹 Piano</span><span class="kb-tag">920 cu.ft.</span></div>
+          <div class="kb-card-foot"><span class="kb-price">$2,280</span><span class="kb-team">Team Alpha · FRM-1</span></div>
+        </div>
+        <div class="kb-card" style="border-left:3px solid var(--sky);"><div class="kb-card-id">#TM-2901-B · 2:00 PM</div><div class="kb-card-name">Lopez Move</div><div class="kb-card-addr">Brooklyn → Long Island</div><div class="kb-card-meta"><span class="kb-tag">✨ White Glove</span><span class="kb-tag">740 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$1,980</span><span class="kb-team">Team Beta · FRM-2</span></div></div>
+        <div class="kb-card" style="border-left:3px solid var(--sky);"><div class="kb-card-id">#TM-2901-C · 2:30 PM</div><div class="kb-card-name">Wong Office</div><div class="kb-card-addr">Midtown → Stamford CT</div><div class="kb-card-meta"><span class="kb-tag">🏢 Office</span><span class="kb-tag">1,200 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$3,200</span><span class="kb-team">Team Gamma · FRM-3</span></div></div>
+      </div>
+      <div class="kb-col">
+        <div class="kb-head">Completed <span class="kb-count">2</span></div>
+        <div class="kb-card" style="opacity:.7;"><div class="kb-card-id">#TM-2847-A · 8:00 AM</div><div class="kb-card-name">Rodriguez Family</div><div class="kb-card-addr">Manhattan → Brooklyn</div><div class="kb-card-meta"><span class="kb-tag">✅ Done</span><span class="kb-tag">580 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$1,350</span><span class="kb-team">⭐ 5.0 rated</span></div></div>
+        <div class="kb-card" style="opacity:.7;"><div class="kb-card-id">#TM-2847-AA · 9:00 AM</div><div class="kb-card-name">Petrov Move</div><div class="kb-card-addr">Hoboken → Queens</div><div class="kb-card-meta"><span class="kb-tag">✅ Done</span><span class="kb-tag">420 cu.ft.</span></div><div class="kb-card-foot"><span class="kb-price">$1,180</span><span class="kb-team">⭐ 5.0 rated</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ DISPATCH PAGE ══ -->
+  <div class="page" id="page-dispatch">
+    <div class="alert-banner">
+      <span class="ab-ico">🟢</span>
+      <div class="ab-text"><b>6 trucks active</b> in NYC metro area · All on schedule · Last GPS ping: 30 seconds ago</div>
+    </div>
+    <div class="dispatch-grid">
+      <div class="map-mock">
+        <div class="map-grid-bg"></div>
+        <div class="map-truck" style="top:30%;left:25%;" title="Team Alpha">🚛</div>
+        <div class="map-label" style="top:22%;left:28%;">Alpha · Kim HH</div>
+        <div class="map-truck" style="top:55%;left:45%;background:var(--green);" title="Team Beta">🚛</div>
+        <div class="map-label" style="top:47%;left:48%;">Beta · Lopez</div>
+        <div class="map-truck" style="top:40%;left:65%;background:var(--gold);" title="Team Gamma">🚛</div>
+        <div class="map-label" style="top:32%;left:68%;">Gamma · Wong</div>
+        <div class="map-truck" style="top:65%;left:20%;background:var(--purple);animation:none;opacity:.6;" title="Team Delta - Standby">🚛</div>
+        <div class="map-label" style="top:57%;left:23%;opacity:.7;">Delta · Standby</div>
+        <div class="map-legend">
+          <div class="ml-item"><div class="ml-dot" style="background:var(--sky);"></div>In Transit</div>
+          <div class="ml-item"><div class="ml-dot" style="background:var(--green);"></div>Loading</div>
+          <div class="ml-item"><div class="ml-dot" style="background:var(--gold);"></div>Delivering</div>
+          <div class="ml-item"><div class="ml-dot" style="background:var(--purple);opacity:.6;"></div>Standby</div>
+        </div>
+      </div>
+      <div class="active-jobs-list">
+        <div class="ajl-head">Active Jobs (3)</div>
+        <div class="ajl-item">
+          <div class="aji-top"><div class="aji-id">#TM-2847-B</div><div class="badge b-sky">● Loading</div></div>
+          <div class="aji-name">Kim Household</div>
+          <div class="aji-addr">789 Columbus Ave → 321 Grove St, JC</div>
+          <div class="aji-foot"><span class="aji-team">Team Alpha · Jose R.</span><span class="aji-status">920 cu.ft.</span></div>
+        </div>
+        <div class="ajl-item">
+          <div class="aji-top"><div class="aji-id">#TM-2901-B</div><div class="badge b-green">● In Transit</div></div>
+          <div class="aji-name">Lopez Move</div>
+          <div class="aji-addr">Brooklyn → Long Island</div>
+          <div class="aji-foot"><span class="aji-team">Team Beta · Marco S.</span><span class="aji-status">740 cu.ft.</span></div>
+        </div>
+        <div class="ajl-item">
+          <div class="aji-top"><div class="aji-id">#TM-2901-C</div><div class="badge b-orange">● Delivering</div></div>
+          <div class="aji-name">Wong Office</div>
+          <div class="aji-addr">Midtown NYC → Stamford CT</div>
+          <div class="aji-foot"><span class="aji-team">Team Gamma · David K.</span><span class="aji-status">1,200 cu.ft.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-head"><span class="sec-title">Assign Job to Team</span></div>
+    <div class="card">
+      <div class="card-title">Quick Dispatch</div>
+      <div class="form-grid">
+        <div class="fg"><label>Select Job</label><select><option>#TM-2901-D — Chen Household</option><option>#TM-2901-E — Marcus Storage</option></select></div>
+        <div class="fg"><label>Assign Foreman</label><select><option>FRM-1 · Jose Rivera (Alpha)</option><option>FRM-2 · Marco Santos (Beta)</option><option>FRM-3 · David Kim (Gamma)</option><option>FRM-4 · Luis Torres (Delta)</option></select></div>
+        <div class="fg"><label>Assign Truck</label><select><option>TRK-007 — 26ft Box Truck</option><option>TRK-012 — 20ft Truck</option></select></div>
+        <div class="fg"><label>Start Time</label><input type="time" value="15:00"/></div>
+      </div>
+      <button class="btn-modal primary" onclick="alert('✅ Job assigned! Team Delta has been notified on their app. Client SMS sent.')">Assign &amp; Notify Team →</button>
+    </div>
+  </div>
+
+  <!-- ══ JOBS PAGE ══ -->
+  <div class="page" id="page-jobs">
+    <div class="tbl-wrap">
+      <div class="tbl-head">
+        <h3>All Jobs — Today</h3>
+        <div style="display:flex;gap:8px;">
+          <button class="tb-btn" style="background:var(--off);color:var(--navy);border:1px solid var(--border);box-shadow:none;">Filter</button>
+          <button class="tb-btn" onclick="openContract()">+ New Order</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Job ID</th><th>Client</th><th>Route</th><th>Service</th><th>Cu.Ft.</th><th>Team</th><th>Value</th><th>Status</th><th>e-BOL</th></tr></thead>
+        <tbody>
+          <tr onclick="openContract()"><td class="td-bold">#TM-2847-A</td><td>Rodriguez Family</td><td class="td-muted">Manhattan → Brooklyn</td><td><span class="badge b-sky">Local</span></td><td>580</td><td>Alpha·FRM-1</td><td class="td-bold">$1,350</td><td><span class="badge b-green">✓ Done</span></td><td><span class="badge b-green">Signed</span></td></tr>
+          <tr onclick="openContract()" style="background:rgba(58,171,220,.03);"><td class="td-bold">#TM-2847-B</td><td>Kim Household</td><td class="td-muted">UWS → Jersey City</td><td><span class="badge b-purple">White Glove</span></td><td>920</td><td>Alpha·FRM-1</td><td class="td-bold">$2,280</td><td><span class="badge b-sky">● Active</span></td><td><span class="badge b-orange">Pending</span></td></tr>
+          <tr onclick="openContract()"><td class="td-bold">#TM-2847-C</td><td>Castro Apartment</td><td class="td-muted">Bronx → Newark</td><td><span class="badge b-sky">Local</span></td><td>340</td><td>Delta·FRM-4</td><td class="td-bold">$950</td><td><span class="badge b-orange">Upcoming</span></td><td><span class="badge b-navy">—</span></td></tr>
+          <tr onclick="openContract()"><td class="td-bold">#TM-2901-B</td><td>Lopez Move</td><td class="td-muted">Brooklyn → Long Island</td><td><span class="badge b-purple">White Glove</span></td><td>740</td><td>Beta·FRM-2</td><td class="td-bold">$1,980</td><td><span class="badge b-sky">● Active</span></td><td><span class="badge b-orange">Pending</span></td></tr>
+          <tr onclick="openContract()"><td class="td-bold">#TM-2901-C</td><td>Wong Office</td><td class="td-muted">Midtown → Stamford CT</td><td><span class="badge b-gold">Office</span></td><td>1,200</td><td>Gamma·FRM-3</td><td class="td-bold">$3,200</td><td><span class="badge b-sky">● Active</span></td><td><span class="badge b-orange">Pending</span></td></tr>
+          <tr onclick="openContract()"><td class="td-bold">#TM-2901-D</td><td>Chen Household</td><td class="td-muted">Flushing → Hoboken</td><td><span class="badge b-sky">Local</span></td><td>380</td><td>Unassigned</td><td class="td-bold">$1,180</td><td><span class="badge b-navy">Pending</span></td><td><span class="badge b-navy">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ LEADS PAGE ══ -->
+  <div class="page" id="page-leads">
+    <div class="alert-banner warn">
+      <span class="ab-ico">⏰</span>
+      <div class="ab-text"><b>5 new leads</b> need follow-up · Average response time target: 30 minutes</div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>CRM — Lead Pipeline</h3><button class="tb-btn">Export CSV</button></div>
+      <table>
+        <thead><tr><th>Date/Time</th><th>Client</th><th>Move Type</th><th>From → To</th><th>Est. Price</th><th>Source</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr><td class="td-muted">Today 2:14 PM</td><td class="td-bold">Ana Martinez</td><td><span class="badge b-sky">Local 2BR</span></td><td class="td-muted">Bronx → Queens</td><td class="td-bold">$1,100</td><td>Web Form</td><td><span class="badge b-red">New</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="alert('Opening quote for Ana Martinez...')">Quote</button></td></tr>
+          <tr><td class="td-muted">Today 1:45 PM</td><td class="td-bold">Robert Chang</td><td><span class="badge b-gold">Office Move</span></td><td class="td-muted">Manhattan → NJ</td><td class="td-bold">$3,800</td><td>Google Ads</td><td><span class="badge b-red">New</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;">Quote</button></td></tr>
+          <tr><td class="td-muted">Today 11:20 AM</td><td class="td-bold">Isabella Torres</td><td><span class="badge b-purple">White Glove</span></td><td class="td-muted">UES → Long Island</td><td class="td-bold">$2,600</td><td>Referral</td><td><span class="badge b-orange">Contacted</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;">Follow Up</button></td></tr>
+          <tr><td class="td-muted">Today 10:05 AM</td><td class="td-bold">Michael Brown</td><td><span class="badge b-sky">Local Studio</span></td><td class="td-muted">Brooklyn → Manhattan</td><td class="td-bold">$650</td><td>Yelp</td><td><span class="badge b-sky">Quoted</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;">Close</button></td></tr>
+          <tr><td class="td-muted">Today 9:30 AM</td><td class="td-bold">Diana Patel</td><td><span class="badge b-sky">Long Distance</span></td><td class="td-muted">NYC → Miami FL</td><td class="td-bold">$4,200</td><td>Web Form</td><td><span class="badge b-green">Booked ✓</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;">View Order</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ CONTRACTS PAGE ══ -->
+  <div class="page" id="page-contracts">
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-green"><div class="kpi-icon">✅</div><div class="kpi-num">142</div><div class="kpi-lbl">Signed This Month</div></div>
+      <div class="kpi k-orange"><div class="kpi-icon" style="font-size:24px;">⏳</div><div class="kpi-num">8</div><div class="kpi-lbl">Awaiting Signature</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">📧</div><div class="kpi-num">156</div><div class="kpi-lbl">Contracts Sent</div></div>
+      <div class="kpi k-purple"><div class="kpi-icon">📋</div><div class="kpi-num">98%</div><div class="kpi-lbl">Signing Rate</div></div>
+    </div>
+    <div class="sec-head"><span class="sec-title">Contract Templates</span><button class="tb-btn" onclick="openContract()">Preview Full Contract</button></div>
+    <div class="card">
+      <div class="card-title">Active Contract Templates</div>
+      <table>
+        <thead><tr><th>Template Name</th><th>Type</th><th>Last Updated</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td class="td-bold">Standard Local Move Agreement</td><td><span class="badge b-sky">Local</span></td><td class="td-muted">May 1, 2026</td><td><span class="badge b-green">Active</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="openContract()">Preview</button></td></tr>
+          <tr><td class="td-bold">Long Distance Moving Contract</td><td><span class="badge b-orange">Long Dist.</span></td><td class="td-muted">Apr 28, 2026</td><td><span class="badge b-green">Active</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="openContract()">Preview</button></td></tr>
+          <tr><td class="td-bold">White Glove Service Agreement</td><td><span class="badge b-purple">White Glove</span></td><td class="td-muted">Apr 15, 2026</td><td><span class="badge b-green">Active</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="openContract()">Preview</button></td></tr>
+          <tr><td class="td-bold">Commercial / Office Move Contract</td><td><span class="badge b-gold">Office</span></td><td class="td-muted">Apr 10, 2026</td><td><span class="badge b-green">Active</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="openContract()">Preview</button></td></tr>
+          <tr><td class="td-bold">Storage Agreement</td><td><span class="badge b-navy">Storage</span></td><td class="td-muted">Mar 20, 2026</td><td><span class="badge b-green">Active</span></td><td><button class="tb-btn" style="padding:4px 10px;font-size:11px;" onclick="openContract()">Preview</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ EMPLOYEES PAGE ══ -->
+  <div class="page" id="page-employees">
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-sky"><div class="kpi-icon">👷</div><div class="kpi-num">32</div><div class="kpi-lbl">Total Employees</div></div>
+      <div class="kpi k-green"><div class="kpi-icon">✅</div><div class="kpi-num">24</div><div class="kpi-lbl">On Duty Today</div></div>
+      <div class="kpi k-gold"><div class="kpi-icon">🏆</div><div class="kpi-num">4.88</div><div class="kpi-lbl">Team Avg Rating</div></div>
+      <div class="kpi k-purple"><div class="kpi-icon">📦</div><div class="kpi-num">48,240</div><div class="kpi-lbl">Cu.Ft. This Month</div></div>
+    </div>
+    <div class="emp-grid">
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-diamond">💎 Diamond</div>
+          <div class="emp-ava">JR</div>
+          <div class="emp-name">Jose Rivera</div>
+          <div class="emp-role">Lead Foreman · Team Alpha · FRM-1</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">247</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.9★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">0</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>8,420 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:92%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.9 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:98%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>0.0%</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-green" style="width:100%;"></div></div>
+        </div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-gold">🥇 Gold</div>
+          <div class="emp-ava">MS</div>
+          <div class="emp-name">Marco Santos</div>
+          <div class="emp-role">Foreman · Team Beta · FRM-2</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">198</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.8★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">1</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>6,840 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:74%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.8 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:96%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>0.5%</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-green" style="width:95%;"></div></div>
+        </div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-gold">🥇 Gold</div>
+          <div class="emp-ava">DK</div>
+          <div class="emp-name">David Kim</div>
+          <div class="emp-role">Foreman · Team Gamma · FRM-3</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">182</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.8★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">0</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>6,210 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:67%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.8 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:96%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>0.0%</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-green" style="width:100%;"></div></div>
+        </div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-silver">🥈 Silver</div>
+          <div class="emp-ava">LT</div>
+          <div class="emp-name">Luis Torres</div>
+          <div class="emp-role">Foreman · Team Delta · FRM-4</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">124</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.6★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">2</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>4,100 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:44%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.6 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:92%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>1.6%</span></div>
+          <div class="progress-bar"><div class="pb-fill" style="width:84%;background:linear-gradient(90deg,var(--orange),var(--red));"></div></div>
+        </div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-silver">🥈 Silver</div>
+          <div class="emp-ava">AR</div>
+          <div class="emp-name">Alex Reyes</div>
+          <div class="emp-role">Foreman · Team Epsilon · FRM-5</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">98</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.7★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">1</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>3,280 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:35%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.7 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:94%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>1.0%</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-green" style="width:90%;"></div></div>
+        </div>
+      </div>
+      <div class="emp-card">
+        <div class="emp-card-top">
+          <div class="emp-tier-badge tier-bronze">🥉 Bronze</div>
+          <div class="emp-ava">CM</div>
+          <div class="emp-name">Carlos Mendez</div>
+          <div class="emp-role">Mover · Team Alpha · MV-12</div>
+        </div>
+        <div class="emp-card-body">
+          <div class="emp-stats">
+            <div class="es"><div class="es-n">44</div><div class="es-l">Total Moves</div></div>
+            <div class="es"><div class="es-n">4.5★</div><div class="es-l">Rating</div></div>
+            <div class="es"><div class="es-n">0</div><div class="es-l">Claims</div></div>
+          </div>
+          <div class="emp-bar-lbl"><span>Cu.Ft. Progress</span><span>1,440 cu.ft.</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-blue" style="width:16%;"></div></div>
+          <div class="emp-bar-lbl"><span>Rating</span><span>4.5 / 5.0</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-gold" style="width:90%;"></div></div>
+          <div class="emp-bar-lbl"><span>Claim Rate</span><span>0.0%</span></div>
+          <div class="progress-bar"><div class="pb-fill pb-green" style="width:100%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEADERBOARD PAGE ══ -->
+  <div class="page" id="page-leaderboard">
+    <div class="alert-banner">
+      <span class="ab-ico">🎯</span>
+      <div class="ab-text"><b>Monthly Incentive Program:</b> Top cu.ft. + best reviews + zero claims = $500 bonus + Diamond tier + featured on company wall</div>
+    </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-gold"><div class="kpi-icon">💎</div><div class="kpi-num">1</div><div class="kpi-lbl">Diamond Tier</div><div class="kpi-sub">8,000+ cu.ft. · 4.9★ · 0 claims</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">🥇</div><div class="kpi-num">3</div><div class="kpi-lbl">Gold Tier</div><div class="kpi-sub">5,000+ cu.ft. · 4.7★ · &lt;1% claims</div></div>
+      <div class="kpi k-navy"><div class="kpi-icon">🥈</div><div class="kpi-num">4</div><div class="kpi-lbl">Silver Tier</div><div class="kpi-sub">3,000+ cu.ft. · 4.5★</div></div>
+      <div class="kpi k-purple"><div class="kpi-icon">🥉</div><div class="kpi-num">8</div><div class="kpi-lbl">Bronze Tier</div><div class="kpi-sub">Entry level · Building up</div></div>
+    </div>
+
+    <div class="lb-wrap">
+      <div class="lb-header">
+        <div><div class="lb-title">🏆 Team Leaderboard — May 2026</div><div class="lb-sub">Ranked by: Cu.Ft. + Rating Score + Zero Claims Bonus</div></div>
+        <div class="lb-tabs">
+          <button class="lb-tab act" onclick="setLbTab(this,'cuft')">Cu.Ft.</button>
+          <button class="lb-tab" onclick="setLbTab(this,'rating')">Rating</button>
+          <button class="lb-tab" onclick="setLbTab(this,'overall')">Overall</button>
+        </div>
+      </div>
+
+      <div class="lb-row" onclick="nav('employees',document.querySelector('[onclick*=employees]'))">
+        <div class="lb-rank rank-1">1</div>
+        <div class="lb-ava">JR</div>
+        <div class="lb-info">
+          <div class="lb-name">Jose Rivera <span style="font-size:11px;color:var(--muted);">· Team Alpha · FRM-1</span></div>
+          <div class="lb-team">Lead Foreman</div>
+          <div class="lb-tier tier-diamond">💎 Diamond</div>
+        </div>
+        <div style="flex:1;padding:0 14px;">
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:100%;"></div></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px;">8,420 / 9,000 target</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-cuft">8,420</div>
+          <div class="lb-cuft-lbl">cu.ft. this month</div>
+          <div class="lb-rating">★ 4.9 · 0 claims · $500 bonus</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank rank-2">2</div>
+        <div class="lb-ava">DK</div>
+        <div class="lb-info">
+          <div class="lb-name">David Kim <span style="font-size:11px;color:var(--muted);">· Team Gamma · FRM-3</span></div>
+          <div class="lb-team">Foreman</div>
+          <div class="lb-tier tier-gold">🥇 Gold</div>
+        </div>
+        <div style="flex:1;padding:0 14px;">
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:74%;"></div></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px;">6,210 / 9,000 target</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-cuft">6,210</div>
+          <div class="lb-cuft-lbl">cu.ft. this month</div>
+          <div class="lb-rating">★ 4.8 · 0 claims · $200 bonus</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank rank-3">3</div>
+        <div class="lb-ava">MS</div>
+        <div class="lb-info">
+          <div class="lb-name">Marco Santos <span style="font-size:11px;color:var(--muted);">· Team Beta · FRM-2</span></div>
+          <div class="lb-team">Foreman</div>
+          <div class="lb-tier tier-gold">🥇 Gold</div>
+        </div>
+        <div style="flex:1;padding:0 14px;">
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:81%;"></div></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px;">6,840 / 9,000 target</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-cuft">6,840</div>
+          <div class="lb-cuft-lbl">cu.ft. this month</div>
+          <div class="lb-rating">★ 4.8 · 1 claim · $150 bonus</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank rank-other">4</div>
+        <div class="lb-ava">AR</div>
+        <div class="lb-info">
+          <div class="lb-name">Alex Reyes <span style="font-size:11px;color:var(--muted);">· Team Epsilon · FRM-5</span></div>
+          <div class="lb-team">Foreman</div>
+          <div class="lb-tier tier-silver">🥈 Silver</div>
+        </div>
+        <div style="flex:1;padding:0 14px;">
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:36%;"></div></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px;">3,280 / 9,000 target</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-cuft">3,280</div>
+          <div class="lb-cuft-lbl">cu.ft. this month</div>
+          <div class="lb-rating">★ 4.7 · 1 claim</div>
+        </div>
+      </div>
+
+      <div class="lb-row">
+        <div class="lb-rank rank-other">5</div>
+        <div class="lb-ava">LT</div>
+        <div class="lb-info">
+          <div class="lb-name">Luis Torres <span style="font-size:11px;color:var(--muted);">· Team Delta · FRM-4</span></div>
+          <div class="lb-team">Foreman</div>
+          <div class="lb-tier tier-silver">🥈 Silver</div>
+        </div>
+        <div style="flex:1;padding:0 14px;">
+          <div class="lb-bar"><div class="lb-bar-fill" style="width:45%;background:linear-gradient(90deg,var(--orange),var(--gold));"></div></div>
+          <div style="font-size:9px;color:var(--muted);margin-top:2px;">4,100 / 9,000 target</div>
+        </div>
+        <div class="lb-stats">
+          <div class="lb-cuft">4,100</div>
+          <div class="lb-cuft-lbl">cu.ft. this month</div>
+          <div class="lb-rating" style="color:var(--orange);">★ 4.6 · 2 claims ⚠️</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Tier Requirements &amp; Incentives</div>
+      <table>
+        <thead><tr><th>Tier</th><th>Cu.Ft. / Month</th><th>Min. Rating</th><th>Max Claims</th><th>Incentive</th></tr></thead>
+        <tbody>
+          <tr><td><span class="badge b-purple">💎 Diamond</span></td><td class="td-bold">8,000+</td><td>4.9★</td><td>0</td><td class="td-bold" style="color:var(--green);">$500 bonus + featured + priority schedule</td></tr>
+          <tr><td><span class="badge b-gold">🥇 Gold</span></td><td class="td-bold">5,000+</td><td>4.7★</td><td>1</td><td class="td-bold" style="color:var(--green);">$200 bonus + premium jobs access</td></tr>
+          <tr><td><span class="badge b-navy">🥈 Silver</span></td><td class="td-bold">3,000+</td><td>4.5★</td><td>2</td><td>$75 bonus + recognition</td></tr>
+          <tr><td><span class="badge b-orange">🥉 Bronze</span></td><td class="td-bold">1,000+</td><td>4.2★</td><td>3</td><td>Standard pay · Building tier</td></tr>
+          <tr><td><span class="badge b-red">⬇️ Demotion</span></td><td class="td-muted">Below target</td><td>Below 4.2</td><td>4+</td><td class="td-muted" style="color:var(--red);">Tier drops · Performance review triggered</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAYMENTS PAGE ══ -->
+  <div class="page" id="page-payments">
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-green"><div class="kpi-icon">💵</div><div class="kpi-num">$18,240</div><div class="kpi-lbl">Revenue Today</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">📊</div><div class="kpi-num">$142,800</div><div class="kpi-lbl">This Month</div><div class="kpi-sub up">↑ 18% vs last</div></div>
+      <div class="kpi k-gold"><div class="kpi-icon">⏳</div><div class="kpi-num">$4,430</div><div class="kpi-lbl">Pending</div></div>
+      <div class="kpi k-red"><div class="kpi-icon">↩️</div><div class="kpi-num">$320</div><div class="kpi-lbl">Refunds</div></div>
+    </div>
+    <div class="tbl-wrap">
+      <div class="tbl-head"><h3>Payment Transactions</h3><button class="tb-btn">Export</button></div>
+      <table>
+        <thead><tr><th>Date</th><th>Job ID</th><th>Client</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="td-muted">Today 2:10 PM</td><td>#TM-2847-A</td><td>Rodriguez Family</td><td>Stripe / Visa</td><td class="td-bold" style="color:var(--green);">$1,350</td><td><span class="badge b-green">✓ Paid</span></td></tr>
+          <tr><td class="td-muted">Today 12:00 PM</td><td>#TM-2847-B</td><td>Kim Household</td><td>Stripe / MC</td><td class="td-bold">$2,280</td><td><span class="badge b-orange">Deposit Paid</span></td></tr>
+          <tr><td class="td-muted">Today 11:30 AM</td><td>#TM-2901-C</td><td>Wong Office</td><td>ACH Wire</td><td class="td-bold" style="color:var(--green);">$3,200</td><td><span class="badge b-green">✓ Paid</span></td></tr>
+          <tr><td class="td-muted">Today 9:45 AM</td><td>#TM-2901-B</td><td>Lopez Move</td><td>Stripe / Visa</td><td class="td-bold">$1,980</td><td><span class="badge b-sky">In Progress</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ CLAIMS PAGE ══ -->
+  <div class="page" id="page-claims">
+    <div class="alert-banner warn">
+      <span class="ab-ico">⚠️</span>
+      <div class="ab-text"><b>2 open claims</b> require attention · Claim rate this month: 1.2% · Target: below 2%</div>
+    </div>
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-red"><div class="kpi-icon">🚨</div><div class="kpi-num">2</div><div class="kpi-lbl">Open Claims</div></div>
+      <div class="kpi k-orange"><div class="kpi-icon">⏳</div><div class="kpi-num">1</div><div class="kpi-lbl">In Review</div></div>
+      <div class="kpi k-green"><div class="kpi-icon">✅</div><div class="kpi-num">14</div><div class="kpi-lbl">Resolved This Month</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">📊</div><div class="kpi-num">1.2%</div><div class="kpi-lbl">Claim Rate</div></div>
+    </div>
+    <div class="sec-head"><span class="sec-title">Open Claims</span></div>
+    <div class="claim-card">
+      <div class="claim-head"><div><div class="claim-id">#CLM-2847-01 · Job #TM-2847-B · Team Delta</div><div class="claim-client">Torres Household</div></div><span class="badge b-red">Open · High Priority</span></div>
+      <div class="claim-desc">Client reports a scratch on a wooden dresser during transport. Item valued at approximately $800. Client requesting partial reimbursement of $200. Foreman Luis Torres (FRM-4) claims item was already damaged. Photos uploaded by both parties.</div>
+      <div class="claim-actions">
+        <button class="ca-btn ca-resolve" onclick="alert('Opening claim resolution workflow...')">Resolve &amp; Compensate</button>
+        <button class="ca-btn ca-escalate">Escalate to Manager</button>
+        <button class="ca-btn ca-close">Dispute &amp; Close</button>
+      </div>
+    </div>
+    <div class="claim-card">
+      <div class="claim-head"><div><div class="claim-id">#CLM-2901-02 · Job #TM-2901-A · Team Beta</div><div class="claim-client">Petrov Household</div></div><span class="badge b-orange">In Review</span></div>
+      <div class="claim-desc">Client reports late arrival — scheduled 9am, arrived 10:15am. No physical damage. Client requesting $50 discount on final invoice as compensation for the delay. Team Beta foreman confirmed traffic delay on I-95.</div>
+      <div class="claim-actions">
+        <button class="ca-btn ca-resolve" onclick="alert('$50 discount applied. Client notified.')">Apply $50 Discount</button>
+        <button class="ca-btn ca-close">Close Without Action</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ REVIEWS PAGE ══ -->
+  <div class="page" id="page-reviews">
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-gold"><div class="kpi-icon">⭐</div><div class="kpi-num">4.92</div><div class="kpi-lbl">Overall Rating</div></div>
+      <div class="kpi k-green"><div class="kpi-icon">✅</div><div class="kpi-num">142</div><div class="kpi-lbl">Published</div></div>
+      <div class="kpi k-orange"><div class="kpi-icon">⏳</div><div class="kpi-num">12</div><div class="kpi-lbl">Pending Approval</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">📧</div><div class="kpi-num">89%</div><div class="kpi-lbl">Request Open Rate</div></div>
+    </div>
+    <div class="sec-head"><span class="sec-title">Pending Reviews — Approval Queue</span><button class="tb-btn" onclick="alert('All 12 reviews approved and published to website!')">Approve All (12)</button></div>
+
+    <div class="review-card">
+      <div class="rc-head"><div><div class="rc-stars">★★★★★</div><span class="badge b-sky">Google · Pending</span></div><div class="td-muted" style="font-size:11px;">Job #TM-2847-A · Rodriguez Family · Today</div></div>
+      <div class="rc-text">"From the instant quote to the final delivery — absolutely flawless. My Move Coordinator kept me updated every step of the way. This is what moving should feel like. Jose and his team were incredible!"</div>
+      <div class="rc-author"><div class="rc-ava">MR</div><div><div class="rc-name">Maria Rodriguez</div><div class="rc-platform">Manhattan → Brooklyn · Verified Customer</div></div></div>
+      <div class="rc-actions">
+        <button class="rc-btn rc-approve">✓ Approve</button>
+        <button class="rc-btn rc-publish" onclick="alert('Review published to website and Google! ⭐')">Publish to Website</button>
+        <button class="rc-btn rc-delete">Delete</button>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="rc-head"><div><div class="rc-stars">★★★★★</div><span class="badge b-orange">Trustpilot · Pending</span></div><div class="td-muted" style="font-size:11px;">Job #TM-2847-AA · Petrov Move · Today</div></div>
+      <div class="rc-text">"I've moved 6 times in NYC. Never had zero hidden fees before. Tara quoted me $1,180 and that's exactly what I paid. Family truly does come first here."</div>
+      <div class="rc-author"><div class="rc-ava">SP</div><div><div class="rc-name">Sofia Petrov</div><div class="rc-platform">Hoboken → Queens · Verified Customer</div></div></div>
+      <div class="rc-actions">
+        <button class="rc-btn rc-approve">✓ Approve</button>
+        <button class="rc-btn rc-publish" onclick="alert('Review published! ⭐')">Publish to Website</button>
+        <button class="rc-btn rc-delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MARKETING PAGE ══ -->
+  <div class="page" id="page-marketing">
+    <div class="sec-head"><span class="sec-title">Active Promotions</span><button class="tb-btn" onclick="alert('New promotion created!')">+ New Promotion</button></div>
+    <div class="card">
+      <div class="card-title">Website Promotions Manager</div>
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--off);border-radius:8px;border:1px solid var(--border);">
+          <div><div style="font-size:13px;font-weight:700;color:var(--navy);">Summer Special — 10% Off Local Moves</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">June 1 – August 31, 2026 · Code: SUMMER10</div></div>
+          <div class="toggle-wrap"><div class="toggle on" onclick="this.classList.toggle('on')"></div><span class="toggle-lbl">Active</span></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--off);border-radius:8px;border:1px solid var(--border);">
+          <div><div style="font-size:13px;font-weight:700;color:var(--navy);">Referral Program — $100 Credit</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Ongoing · Share link · Earn $100 per referral</div></div>
+          <div class="toggle-wrap"><div class="toggle on" onclick="this.classList.toggle('on')"></div><span class="toggle-lbl">Active</span></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--off);border-radius:8px;border:1px solid var(--border);">
+          <div><div style="font-size:13px;font-weight:700;color:var(--navy);">Last Minute Banner — Same Day Availability</div><div style="font-size:11px;color:var(--muted);margin-top:2px;">Shown on homepage when same-day slots available</div></div>
+          <div class="toggle-wrap"><div class="toggle" onclick="this.classList.toggle('on')"></div><span class="toggle-lbl">Inactive</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Blog &amp; Content</div>
+      <div class="form-grid">
+        <div class="fg full"><label>Post Title</label><input type="text" placeholder="e.g. Top 10 Moving Tips for NYC Apartments"/></div>
+        <div class="fg full"><label>Content</label><textarea placeholder="Write your blog post here..."></textarea></div>
+        <div class="fg"><label>Category</label><select><option>Moving Tips</option><option>NYC Guide</option><option>Storage Tips</option><option>Company News</option></select></div>
+        <div class="fg"><label>Publish Date</label><input type="date"/></div>
+      </div>
+      <button class="btn-modal primary" onclick="alert('Post published to website! ✅')">Publish Post →</button>
+    </div>
+  </div>
+
+  <!-- ══ REPORTS PAGE ══ -->
+  <div class="page" id="page-reports">
+    <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);">
+      <div class="kpi k-green"><div class="kpi-icon">💰</div><div class="kpi-num">$142,800</div><div class="kpi-lbl">Revenue May</div><div class="kpi-sub up">↑ 18% vs April</div></div>
+      <div class="kpi k-sky"><div class="kpi-icon">📋</div><div class="kpi-num">186</div><div class="kpi-lbl">Total Jobs May</div><div class="kpi-sub up">↑ 12%</div></div>
+      <div class="kpi k-gold"><div class="kpi-icon">📦</div><div class="kpi-num">68,420</div><div class="kpi-lbl">Cu.Ft. May</div><div class="kpi-sub up">↑ 9%</div></div>
+      <div class="kpi k-purple"><div class="kpi-icon">🎯</div><div class="kpi-num">38%</div><div class="kpi-lbl">Lead Conversion</div><div class="kpi-sub up">↑ from 31%</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Monthly Summary — May 2026</div>
+      <table>
+        <thead><tr><th>Metric</th><th>This Month</th><th>Last Month</th><th>Change</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Total Revenue</td><td class="td-bold">$142,800</td><td class="td-muted">$121,100</td><td class="td-bold" style="color:var(--green);">↑ 18%</td><td>$130,000</td></tr>
+          <tr><td>Jobs Completed</td><td class="td-bold">186</td><td class="td-muted">167</td><td class="td-bold" style="color:var(--green);">↑ 11%</td><td>175</td></tr>
+          <tr><td>Average Job Value</td><td class="td-bold">$768</td><td class="td-muted">$725</td><td class="td-bold" style="color:var(--green);">↑ 6%</td><td>$750</td></tr>
+          <tr><td>Customer Rating</td><td class="td-bold">4.92★</td><td class="td-muted">4.88★</td><td class="td-bold" style="color:var(--green);">↑ 0.04</td><td>4.90★</td></tr>
+          <tr><td>Claim Rate</td><td class="td-bold">1.2%</td><td class="td-muted">1.5%</td><td class="td-bold" style="color:var(--green);">↓ 0.3%</td><td>&lt;2%</td></tr>
+          <tr><td>Lead Conversion</td><td class="td-bold">38%</td><td class="td-muted">31%</td><td class="td-bold" style="color:var(--green);">↑ 7%</td><td>35%</td></tr>
+          <tr><td>Total Cu.Ft. Moved</td><td class="td-bold">68,420</td><td class="td-muted">62,800</td><td class="td-bold" style="color:var(--green);">↑ 9%</td><td>65,000</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS PAGE ══ -->
+  <div class="page" id="page-settings">
+    <div class="card">
+      <div class="card-title">Company Settings</div>
+      <div class="form-grid">
+        <div class="fg"><label>Company Name</label><input type="text" value="Tara Moving &amp; Storage Company"/></div>
+        <div class="fg"><label>Phone</label><input type="text" value="(212) 555-0100"/></div>
+        <div class="fg"><label>Email</label><input type="text" value="info@taramoving.com"/></div>
+        <div class="fg"><label>Service Areas</label><input type="text" value="New York, New Jersey, Connecticut"/></div>
+        <div class="fg full"><label>Business Hours</label><input type="text" value="Monday–Sunday 7:00 AM – 10:00 PM"/></div>
+      </div>
+      <button class="btn-modal primary" onclick="alert('Settings saved!')">Save Settings</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Notifications &amp; Automations</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Auto-send contract when job is booked</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Auto-send review request after job completion</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">SMS client when crew is en route</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Alert coordinator when new lead arrives</span><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Send daily revenue report to admin email</span><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- ══ CONTRACT MODAL ══ -->
+<div class="modal-overlay" id="contractModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">Moving Service Agreement</div>
+      <div class="modal-close" onclick="closeContract()">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="contract-header">
+        <div class="ch-logo">🚛</div>
+        <div class="ch-company">TARA MOVING &amp; STORAGE COMPANY</div>
+        <div class="ch-sub">New York · New Jersey · Licensed &amp; Insured · USDOT#: 4829104</div>
+        <div class="ch-title">Residential Moving Service Agreement</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px;">Contract #TM-2847-B · Issued: May 7, 2026</div>
+      </div>
+
+      <div class="contract-detail-grid">
+        <div class="cd-item"><div class="cd-lbl">Client Name</div><div class="cd-val">James Kim</div></div>
+        <div class="cd-item"><div class="cd-lbl">Phone</div><div class="cd-val">(212) 555-0199</div></div>
+        <div class="cd-item"><div class="cd-lbl">Pickup Address</div><div class="cd-val">789 Columbus Ave, 12F, NY 10025</div></div>
+        <div class="cd-item"><div class="cd-lbl">Delivery Address</div><div class="cd-val">321 Grove St, 2B, Jersey City NJ 07302</div></div>
+        <div class="cd-item"><div class="cd-lbl">Move Date &amp; Time</div><div class="cd-val">May 7, 2026 · 12:00 PM – 4:00 PM</div></div>
+        <div class="cd-item"><div class="cd-lbl">Estimated Volume</div><div class="cd-val">920 cu.ft. (3BR + Piano)</div></div>
+        <div class="cd-item"><div class="cd-lbl">Guaranteed Price</div><div class="cd-val" style="color:var(--green);font-weight:700;">$2,280 — All-Inclusive Flat-Fee</div></div>
+        <div class="cd-item"><div class="cd-lbl">Assigned Team</div><div class="cd-val">Team Alpha · Foreman Jose Rivera (FRM-1)</div></div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">1. Services Included in Flat-Fee Price</div>
+        <div class="cs-text">The flat-fee price of <strong>$2,280</strong> is all-inclusive and covers: full labor for loading and unloading, all protective packing materials (blankets, stretch wrap, floor runners), furniture disassembly and reassembly, specialty item handling (piano), tolls, fuel, and travel. <strong>No additional charges will be added on move day.</strong> The price is guaranteed and locked as of the contract signing date.</div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">2. Client Rights &amp; Protections (Legally Required — NY/NJ)</div>
+        <div class="cs-text">
+          Under New York State regulations (NY Transportation Law §182) and New Jersey regulations (N.J.A.C. 13:44D), you as the client have the following rights:<br/><br/>
+          <strong>Right to a binding estimate:</strong> This flat-fee quote constitutes a binding estimate. Tara Moving &amp; Storage cannot charge more than the agreed amount except for services expressly requested by client after signing.<br/><br/>
+          <strong>Right to your belongings:</strong> Tara Moving &amp; Storage cannot hold your belongings hostage to collect additional charges beyond the agreed price.<br/><br/>
+          <strong>Right to file a complaint:</strong> You may file a complaint with the New York State Department of Transportation (1-800-786-5423) or the New Jersey Division of Consumer Affairs (1-800-242-5846) if you believe your rights have been violated.<br/><br/>
+          <strong>Right to a written inventory:</strong> You are entitled to a written inventory (Bill of Lading) of all items moved. This document serves as your receipt and proof of the contract.<br/><br/>
+          <strong>Right to claim for damages:</strong> If any item is damaged during the move, you have 30 days to file a written claim with Tara Moving &amp; Storage. The company carries full valuation coverage per USDOT regulations.
+        </div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">3. Client Responsibilities</div>
+        <div class="cs-text">
+          The client agrees to: <strong>(a)</strong> ensure all items listed in the agreed inventory are ready and accessible at the scheduled pickup time; <strong>(b)</strong> disclose any special circumstances (narrow hallways, no elevator, parking restrictions) prior to the move date; <strong>(c)</strong> ensure proper access to both pickup and delivery addresses including elevator reservations if required; <strong>(d)</strong> be present or designate an authorized representative at both origin and destination; <strong>(e)</strong> sign the Bill of Lading (e-BOL) upon completion of delivery to confirm satisfactory service.
+        </div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">4. Company Obligations</div>
+        <div class="cs-text">
+          Tara Moving &amp; Storage agrees to: <strong>(a)</strong> provide a trained, background-checked crew led by Foreman ID FRM-1; <strong>(b)</strong> arrive within the agreed time window; <strong>(c)</strong> handle all items with professional care using appropriate protective materials; <strong>(d)</strong> provide a Certificate of Insurance (COI) to the building management upon request; <strong>(e)</strong> provide real-time GPS tracking access to the client during the move; <strong>(f)</strong> assign a Move Coordinator available by phone throughout the move day; <strong>(g)</strong> not subcontract the work to third parties without client consent.
+        </div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">5. Liability &amp; Insurance Coverage</div>
+        <div class="cs-text">
+          Tara Moving &amp; Storage carries Full Value Protection coverage as required by federal law (49 CFR Part 375). In the event of loss or damage, the company is liable for the <strong>full replacement value</strong> of the affected items, subject to the claims procedure outlined in Section 2. Additional insurance options are available upon request. The company's USDOT number is 4829104 and operates under MC# 1847293.
+        </div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">6. Cancellation Policy</div>
+        <div class="cs-text">
+          <strong>Free cancellation:</strong> Up to 72 hours before the scheduled move date, cancellation is free of charge with full deposit refund.<br/>
+          <strong>Late cancellation (48–72 hours):</strong> 25% of the total price will be charged as a cancellation fee.<br/>
+          <strong>Last-minute cancellation (under 48 hours):</strong> 50% of the total price will be charged.<br/>
+          <strong>Same-day cancellation:</strong> 75% of the total price will be charged.<br/>
+          All refunds are processed within 3–5 business days via the original payment method.
+        </div>
+      </div>
+
+      <div class="contract-section">
+        <div class="cs-title">7. Dispute Resolution</div>
+        <div class="cs-text">
+          Any disputes arising from this agreement shall first be subject to a 30-day good-faith resolution period between the client and Tara Moving &amp; Storage. If unresolved, disputes shall be submitted to binding arbitration in New York County under the rules of the American Arbitration Association. This agreement shall be governed by the laws of the State of New York.
+        </div>
+      </div>
+
+      <div class="contract-disclaimer">
+        <div class="cd-disclaimer">⚖️ <strong>Legal Notice:</strong> This contract has been reviewed for compliance with New York State Transportation Law §180-194, New Jersey Moving Company Regulations (N.J.A.C. 13:44D), and applicable federal regulations (49 CFR Part 375 — Transportation of Household Goods). Client and company copies of this signed contract will be retained for 7 years as required by law. This document constitutes a legally binding agreement.</div>
+      </div>
+
+      <div class="sig-grid">
+        <div class="sig-box">
+          <div class="sig-lbl">Client Signature</div>
+          <div class="sig-line">_________________________</div>
+          <div class="sig-meta">Print Name: ________________________</div>
+          <div class="sig-meta">Date: _____ / _____ / _________</div>
+          <div class="sig-meta">Time: _____________</div>
+          <div class="sig-meta" style="margin-top:8px;font-weight:600;">Initials: ________</div>
+        </div>
+        <div class="sig-box">
+          <div class="sig-lbl">Tara Moving Representative</div>
+          <div class="sig-line">_________________________</div>
+          <div class="sig-meta">Print Name: Jose Rivera (FRM-1)</div>
+          <div class="sig-meta">Date: _____ / _____ / _________</div>
+          <div class="sig-meta">Time: _____________</div>
+          <div class="sig-meta" style="margin-top:8px;font-weight:600;">Initials: ________</div>
+        </div>
+        <div class="sig-box">
+          <div class="sig-lbl">Work START — Client Confirmation</div>
+          <div class="sig-line">_________________________</div>
+          <div class="sig-meta">Client Signature confirming work began</div>
+          <div class="sig-meta">Start Time: _____________</div>
+          <div class="sig-meta" style="margin-top:8px;font-weight:600;">Client Initials: ________</div>
+        </div>
+        <div class="sig-box">
+          <div class="sig-lbl">Work COMPLETE — Client Confirmation</div>
+          <div class="sig-line">_________________________</div>
+          <div class="sig-meta">Client Signature confirming satisfactory delivery</div>
+          <div class="sig-meta">End Time: _____________</div>
+          <div class="sig-meta" style="margin-top:8px;font-weight:600;">Client Initials: ________</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal secondary" onclick="closeContract()">Close</button>
+      <button class="btn-modal gold" onclick="alert('Contract sent to client (212) 555-0199 via SMS and email! 📱📧')">Send to Client</button>
+      <button class="btn-modal primary" onclick="alert('Contract PDF downloaded! ✅')">Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW JOB MODAL -->
+<div class="modal-overlay" id="newJobModal">
+  <div class="modal" style="width:600px;">
+    <div class="modal-head">
+      <div class="modal-title">Create New Job Order</div>
+      <div class="modal-close" onclick="document.getElementById('newJobModal').classList.remove('on')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="fg"><label>Client Name</label><input type="text" placeholder="Full name"/></div>
+        <div class="fg"><label>Phone</label><input type="tel" placeholder="(212) 000-0000"/></div>
+        <div class="fg"><label>Email</label><input type="email" placeholder="client@email.com"/></div>
+        <div class="fg"><label>Move Type</label><select><option>Local Residential</option><option>Long Distance</option><option>Office Move</option><option>White Glove</option><option>Storage</option></select></div>
+        <div class="fg full"><label>Pickup Address</label><input type="text" placeholder="Full address with apartment number"/></div>
+        <div class="fg full"><label>Delivery Address</label><input type="text" placeholder="Full address with apartment number"/></div>
+        <div class="fg"><label>Home Size</label><select><option>Studio</option><option>1 Bedroom</option><option>2 Bedrooms</option><option>3 Bedrooms</option><option>4+ Bedrooms</option></select></div>
+        <div class="fg"><label>Estimated Cu.Ft.</label><input type="number" placeholder="350"/></div>
+        <div class="fg"><label>Move Date</label><input type="date"/></div>
+        <div class="fg"><label>Agreed Price ($)</label><input type="number" placeholder="0.00"/></div>
+        <div class="fg"><label>Assign Foreman</label><select><option>FRM-1 Jose Rivera</option><option>FRM-2 Marco Santos</option><option>FRM-3 David Kim</option><option>FRM-4 Luis Torres</option></select></div>
+        <div class="fg"><label>Assign Truck</label><select><option>TRK-007 · 26ft Box</option><option>TRK-012 · 20ft Truck</option></select></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-modal secondary" onclick="document.getElementById('newJobModal').classList.remove('on')">Cancel</button>
+      <button class="btn-modal primary" onclick="alert('✅ Job created! Contract auto-sent to client. Team notified on app.')">Create Job &amp; Send Contract →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Navigation
+function nav(page, el){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on');});
+  document.getElementById('page-'+page).classList.add('on');
+  document.querySelectorAll('.sb-item').forEach(function(i){i.classList.remove('act');});
+  if(el) el.classList.add('act');
+  var titles={dashboard:'Dashboard',dispatch:'Live Dispatch',jobs:'Jobs & Orders',leads:'Leads & CRM',contracts:'Contracts & e-BOL',employees:'Employees',leaderboard:'Leaderboard',payments:'Payments & Billing',claims:'Claims Management',reviews:'Reviews Manager',marketing:'Marketing & Promotions',reports:'Reports & Analytics',settings:'Settings'};
+  document.getElementById('pageTitle').textContent = titles[page] || page;
+}
+
+// Contract modal
+function openContract(){ document.getElementById('contractModal').classList.add('on'); }
+function closeContract(){ document.getElementById('contractModal').classList.remove('on'); }
+function openNewJob(){ document.getElementById('newJobModal').classList.add('on'); }
+
+// Leaderboard tabs
+function setLbTab(el,type){
+  document.querySelectorAll('.lb-tab').forEach(function(t){t.classList.remove('act');});
+  el.classList.add('act');
+}
+
+// Alert
+function showAlert(){ alert('🔔 Notifications:\n\n• New lead: Robert Chang (Office Move $3,800)\n• Claim #CLM-2847-01 needs attention\n• Team Alpha en route to Kim delivery\n• 12 reviews pending approval'); }
+function showLogout(){ if(confirm('Sign out of Operations Center?')) alert('Signing out...'); }
+</script>
+</body>
+</html>

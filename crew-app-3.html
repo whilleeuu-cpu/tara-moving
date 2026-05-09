@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"/>
+<title>Tara Moving — Crew App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Oswald:wght@500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--sky:#3AABDC;--skyl:#5CC4EE;--navy:#0E1A45;--nm:#1A2A6C;--gold:#C9901A;--goldb:#E8B040;--green:#22C55E;--red:#EF4444;--orange:#F97316;--off:#F4F6FA;--border:#E2E8F2;--mid:#3A4A7A;--muted:#8A9CC0;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100vh;background:#0a1028;font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;}
+.phone{width:375px;height:812px;background:#f4f6fa;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 0 0 10px #1c2240,0 0 0 12px #0a1028,0 40px 100px rgba(0,0,0,.7);}
+@media(max-height:900px){.phone{transform:scale(.88);transform-origin:top center;margin-bottom:-97px;}}
+@media(max-height:800px){.phone{transform:scale(.78);transform-origin:top center;margin-bottom:-178px;}}
+@media(max-height:700px){.phone{transform:scale(.68);transform-origin:top center;margin-bottom:-260px;}}
+.notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:30px;background:#0a1028;border-radius:0 0 18px 18px;z-index:999;}
+.sbar{height:44px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:12px 18px 0;z-index:10;}
+.sbar-time{font-size:13px;font-weight:700;color:#fff;}
+.sbar-icons{font-size:11px;color:rgba(255,255,255,.8);display:flex;gap:4px;}
+.screen{position:absolute;top:44px;left:0;right:0;bottom:0;overflow-y:auto;background:var(--off);display:none;}
+.screen::-webkit-scrollbar{display:none;}
+/* LOGIN */
+#sc-login{display:none;background:linear-gradient(160deg,#0E1A45,#1A2A6C);flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;overflow-y:auto;}
+.l-ico{width:80px;height:80px;border-radius:50%;background:rgba(58,171,220,.15);border:2px solid rgba(58,171,220,.3);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 10px;}
+.l-title{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:1.5px;text-align:center;}
+.l-sub{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:18px;margin-top:2px;}
+.l-hint{background:rgba(58,171,220,.12);border:1px solid rgba(58,171,220,.3);border-radius:10px;padding:12px 14px;width:100%;margin-bottom:16px;}
+.l-hint p{font-size:12px;color:rgba(255,255,255,.85);line-height:2.1;}
+.l-hint b{color:var(--skyl);}
+.l-hint small{font-size:10px;color:rgba(255,255,255,.35);display:block;margin-top:2px;}
+.lf{width:100%;margin-bottom:11px;}
+.lf label{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.45);display:block;margin-bottom:4px;}
+.lf input{width:100%;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.15);border-radius:9px;padding:13px 14px;font-size:15px;font-family:'DM Sans',sans-serif;color:#fff;outline:none;}
+.lf input::placeholder{color:rgba(255,255,255,.3);}
+.l-btn{width:100%;background:linear-gradient(135deg,var(--sky),#1A2A6C);color:#fff;border:none;border-radius:10px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:6px;box-shadow:0 8px 24px rgba(58,171,220,.35);}
+.l-btn:active{opacity:.85;}
+.l-err{display:none;width:100%;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);border-radius:8px;padding:9px;font-size:12px;color:#FCA5A5;text-align:center;margin-top:8px;}
+/* HEADER */
+.ah{background:var(--navy);padding:11px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.ah-l{display:flex;align-items:center;gap:9px;}
+.ah-title{font-family:'Oswald',sans-serif;font-size:13px;font-weight:700;color:#fff;letter-spacing:.5px;line-height:1.2;}
+.ah-sub{font-size:9px;color:rgba(255,255,255,.4);}
+.ah-r{display:flex;align-items:center;gap:7px;}
+.bell{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;position:relative;}
+.bdot{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--navy);}
+.ava{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--nm));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;}
+/* HERO */
+.dhero{background:linear-gradient(135deg,var(--navy),var(--nm));padding:14px 14px 18px;}
+.ddate{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;}
+.dname{font-family:'Oswald',sans-serif;font-size:19px;font-weight:700;color:#fff;margin:3px 0;}
+.dflags{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.flag{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:3px 9px;font-size:9px;font-weight:700;}
+.fg{background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);color:var(--green);}
+.fd{background:rgba(139,92,246,.2);border:1px solid rgba(139,92,246,.4);color:#C4B5FD;}
+.pulse{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pls 2s infinite;}
+@keyframes pls{0%,100%{opacity:1}50%{opacity:.3}}
+.srow{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 11px 0;}
+.sbox{background:#fff;border-radius:9px;padding:10px;text-align:center;border:1px solid var(--border);}
+.sn{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--navy);}
+.sl{font-size:8px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-top:1px;}
+.ss{font-size:8px;font-weight:600;color:var(--green);margin-top:2px;}
+.sh{display:flex;justify-content:space-between;align-items:center;padding:12px 11px 6px;}
+.sh h3{font-family:'Oswald',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--navy);}
+.sh a{font-size:11px;color:var(--sky);cursor:pointer;font-weight:600;}
+.jc{background:#fff;border-radius:11px;margin:0 11px 9px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .1s;}
+.jc:active{transform:scale(.98);}
+.jc-top{padding:10px 11px 7px;display:flex;justify-content:space-between;}
+.jc-id{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.bdg{border-radius:20px;padding:3px 8px;font-size:9px;font-weight:700;}
+.b-done{background:rgba(34,197,94,.1);color:var(--green);}
+.b-act{background:rgba(58,171,220,.12);color:var(--sky);}
+.b-pend{background:rgba(249,115,22,.1);color:var(--orange);}
+.jc-bd{padding:0 11px 9px;}
+.jc-nm{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.jc-ad{font-size:10px;color:var(--mid);line-height:1.4;margin-bottom:6px;}
+.jc-ad b{color:var(--sky);}
+.tags{display:flex;gap:4px;flex-wrap:wrap;}
+.tg{background:var(--off);border-radius:4px;padding:2px 6px;font-size:9px;color:var(--mid);}
+.jc-ft{background:var(--off);padding:7px 11px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);}
+.jp{font-size:13px;font-weight:700;color:var(--navy);}
+.jcf{font-size:9px;color:var(--muted);}
+.obtn{background:linear-gradient(135deg,var(--sky),var(--nm));color:#fff;border:none;border-radius:5px;padding:5px 10px;font-size:10px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;}
+/* JOB */
+.jdhero{background:linear-gradient(135deg,var(--navy),var(--nm));padding:10px 14px 14px;}
+.bk{font-size:11px;color:rgba(255,255,255,.55);cursor:pointer;margin-bottom:5px;display:inline-flex;align-items:center;gap:3px;}
+.jd-id{font-size:9px;color:var(--skyl);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px;}
+.jd-nm{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px;}
+.prog{padding:12px;background:#fff;border-bottom:1px solid var(--border);}
+.pg-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.pg-steps{display:flex;align-items:center;}
+.ps{display:flex;flex-direction:column;align-items:center;flex:1;}
+.pd{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);background:#fff;z-index:1;transition:all .3s;}
+.pd.dn{background:var(--green);border-color:var(--green);color:#fff;}
+.pd.ac{background:var(--sky);border-color:var(--sky);color:#fff;box-shadow:0 0 0 3px rgba(58,171,220,.2);}
+.pl{flex:1;height:2px;background:var(--border);transition:background .3s;}
+.pl.dn{background:var(--green);}
+.pl-lbl{font-size:7px;color:var(--muted);margin-top:2px;text-align:center;}
+.pl-lbl.ac{color:var(--sky);font-weight:700;}
+.iblk{padding:10px 12px;border-bottom:1px solid var(--border);}
+.ib-t{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.ir{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;}
+.ir-i{width:28px;height:28px;border-radius:6px;flex-shrink:0;background:rgba(58,171,220,.08);display:flex;align-items:center;justify-content:center;font-size:12px;}
+.ir-l{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:1px;}
+.ir-v{font-size:12px;font-weight:500;color:var(--navy);line-height:1.4;}
+.ir-v a{color:var(--sky);text-decoration:none;}
+.cuft-bx{background:rgba(58,171,220,.06);border:1px solid rgba(58,171,220,.2);border-radius:9px;padding:11px;margin:10px 12px;}
+.cbt{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sky);margin-bottom:6px;}
+.cbn{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cbig{font-family:'Oswald',sans-serif;font-size:28px;font-weight:700;color:var(--navy);}
+.cbd{font-size:10px;color:var(--muted);text-align:right;line-height:1.5;}
+.ctr{height:5px;background:rgba(58,171,220,.15);border-radius:3px;overflow:hidden;}
+.cfil{height:100%;background:linear-gradient(90deg,var(--sky),var(--nm));border-radius:3px;width:65%;}
+.csub{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:3px;}
+.csub b{color:var(--sky);}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;padding:0 12px 10px;}
+.ii{background:var(--off);border-radius:7px;padding:8px 9px;border:1px solid var(--border);}
+.ii-n{font-size:11px;font-weight:600;color:var(--navy);}
+.ii-c{font-size:9px;color:var(--muted);}
+.ii-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;}
+.ick{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:9px;transition:all .15s;background:#fff;}
+.ick.on{background:var(--green);border-color:var(--green);color:#fff;}
+.svctags{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 10px;}
+.st{border-radius:5px;padding:3px 8px;font-size:10px;font-weight:600;}
+.t-pu{background:rgba(139,92,246,.1);color:#7C3AED;border:1px solid rgba(139,92,246,.2);}
+.t-go{background:rgba(201,144,26,.1);color:var(--gold);border:1px solid rgba(201,144,26,.2);}
+.t-gr{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);}
+.t-sk{background:rgba(58,171,220,.1);color:var(--sky);border:1px solid rgba(58,171,220,.2);}
+.chatwrap{padding:10px 12px 5px;}
+.cb{border-radius:9px;padding:8px 11px;margin-bottom:6px;max-width:82%;}
+.cbi{background:var(--off);border:1px solid var(--border);}
+.cbo{background:linear-gradient(135deg,var(--sky),var(--nm));color:#fff;margin-left:auto;}
+.ct{font-size:11px;line-height:1.5;}
+.ctm{font-size:8px;color:var(--muted);margin-top:2px;}
+.cbo .ctm{color:rgba(255,255,255,.5);}
+.csr{display:flex;gap:7px;padding:5px 12px 10px;}
+.ci{flex:1;border:1.5px solid var(--border);border-radius:16px;padding:8px 12px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;}
+.csnd{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--nm));border:none;cursor:pointer;color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;}
+/* SIGNATURES */
+.sig-panel{margin:0 12px 10px;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.sig-ph{background:linear-gradient(135deg,var(--navy),var(--nm));padding:10px 14px;display:flex;justify-content:space-between;align-items:center;}
+.sig-ph-t{font-family:'Oswald',sans-serif;font-size:12px;font-weight:700;color:#fff;letter-spacing:.5px;text-transform:uppercase;}
+.sig-ph-s{font-size:9px;font-weight:700;border-radius:10px;padding:2px 8px;}
+.sp-pend{background:rgba(249,115,22,.2);color:var(--orange);}
+.sp-part{background:rgba(58,171,220,.2);color:var(--skyl);}
+.sp-done{background:rgba(34,197,94,.2);color:var(--green);}
+.sig-body{padding:12px;}
+.sig-slbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.sig-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.sig-box{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.sig-bh{background:var(--off);padding:6px 10px;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.sig-bb{padding:9px;}
+.sig-area{background:#f8fafc;border:1.5px dashed var(--border);border-radius:7px;height:56px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:6px;transition:all .2s;overflow:hidden;}
+.sig-area.signed{background:rgba(34,197,94,.04);border-color:rgba(34,197,94,.4);cursor:default;}
+.sig-ph-txt{font-size:10px;color:var(--muted);text-align:center;pointer-events:none;}
+.sig-done-txt{font-size:17px;font-style:italic;font-family:cursive;color:var(--nm);text-align:center;pointer-events:none;}
+.sig-inp{width:100%;border:1px solid var(--border);border-radius:5px;padding:5px 8px;font-size:11px;font-family:'DM Sans',sans-serif;outline:none;color:var(--navy);background:#fff;margin-bottom:4px;}
+.sig-inp:focus{border-color:var(--sky);}
+.sig-t{font-size:8px;color:var(--sky);font-weight:600;text-align:center;min-height:12px;}
+.sig-btn{width:100%;border:none;border-radius:6px;padding:9px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;margin-top:2px;}
+.sig-btn:active{opacity:.85;}
+.sig-btn-bl{background:linear-gradient(135deg,var(--sky),var(--nm));color:#fff;}
+.sig-btn-gr{background:linear-gradient(135deg,var(--green),#16A34A);color:#fff;}
+.sig-done-card{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:9px;text-align:center;margin-top:8px;}
+.sdc-t{font-size:12px;font-weight:700;color:var(--navy);}
+.sdc-tm{font-size:10px;color:var(--green);font-weight:600;margin-top:2px;}
+.sdc-i{font-size:10px;color:var(--muted);}
+.sig-div{height:1px;background:var(--border);margin:12px 0;}
+/* ACTIONS */
+.actrow{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:8px 12px;}
+.ab{border:none;border-radius:8px;padding:11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:transform .1s;}
+.ab:active{transform:scale(.97);}
+.ab-bl{background:linear-gradient(135deg,var(--sky),var(--nm));color:#fff;box-shadow:0 4px 12px rgba(58,171,220,.3);}
+.ab-wh{background:var(--off);color:var(--navy);border:1.5px solid var(--border);}
+.ab-gr{background:linear-gradient(135deg,var(--green),#16A34A);color:#fff;}
+.ab-gd{background:linear-gradient(135deg,var(--gold),#D4A020);color:#fff;grid-column:1/-1;}
+/* SCHEDULE */
+.calr{background:#fff;padding:9px 11px;display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.calr::-webkit-scrollbar{display:none;}
+.cday{min-width:42px;height:58px;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid var(--border);}
+.cday.ac{background:linear-gradient(135deg,var(--sky),var(--nm));border-color:transparent;color:#fff;}
+.cday.hs::after{content:'';display:block;width:4px;height:4px;border-radius:50%;background:var(--goldb);margin-top:2px;}
+.cd-d{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:inherit;opacity:.7;}
+.cd-n{font-size:16px;font-weight:700;color:inherit;}
+/* EARNINGS */
+.ehero{background:linear-gradient(135deg,var(--navy),var(--nm));padding:18px 14px;text-align:center;}
+.ehl{font-size:9px;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.eha{font-family:'Oswald',sans-serif;font-size:38px;font-weight:700;color:#fff;}
+.ehp{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;}
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px 11px 0;}
+.ec{background:#fff;border-radius:9px;padding:10px;border:1px solid var(--border);}
+.ecl{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;}
+.ecv{font-family:'Oswald',sans-serif;font-size:19px;font-weight:700;color:var(--navy);}
+.ecs{font-size:9px;color:var(--green);}
+.eli{padding:10px 11px;}
+.ell{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.ei{background:#fff;border-radius:8px;padding:9px 11px;margin-bottom:6px;display:flex;align-items:center;gap:9px;border:1px solid var(--border);}
+.eii{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.eig{background:rgba(34,197,94,.1);}
+.eib{background:rgba(58,171,220,.1);}
+.einm{font-size:11px;font-weight:600;color:var(--navy);}
+.eidt{font-size:9px;color:var(--muted);}
+.eiamt{font-size:12px;font-weight:700;color:var(--green);margin-left:auto;white-space:nowrap;}
+/* PROFILE */
+.phero{background:linear-gradient(135deg,var(--navy),var(--nm));padding:20px 14px;text-align:center;}
+.pav{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--nm));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 8px;border:3px solid rgba(255,255,255,.3);}
+.pnm{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:#fff;}
+.pro{font-size:10px;color:rgba(255,255,255,.4);}
+.pbdg{display:inline-flex;align-items:center;gap:4px;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:20px;padding:3px 9px;font-size:9px;font-weight:600;color:var(--green);margin-top:7px;}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;padding:10px 11px 0;}
+.pgc{background:#fff;border-radius:9px;padding:9px;text-align:center;border:1px solid var(--border);}
+.pgn{font-family:'Oswald',sans-serif;font-size:19px;font-weight:700;color:var(--navy);}
+.pgl{font-size:8px;color:var(--muted);}
+.rcard{margin:10px 11px 0;background:linear-gradient(135deg,#1E0A45,#2A1A6C);border-radius:12px;padding:14px;border:1px solid rgba(139,92,246,.3);}
+.rc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.rc-lbl{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.4);}
+.rc-tier{font-family:'Oswald',sans-serif;font-size:16px;font-weight:700;color:#C4B5FD;}
+.rc-main{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.rc-ico{font-size:44px;line-height:1;}
+.rc-n{font-family:'Oswald',sans-serif;font-size:32px;font-weight:700;color:#fff;line-height:1;}
+.rc-nl{font-size:10px;color:rgba(255,255,255,.5);}
+.rc-bonus{font-size:10px;color:#C4B5FD;margin-top:3px;}
+.rc-bars{display:flex;flex-direction:column;gap:7px;}
+.rcb{display:flex;flex-direction:column;gap:2px;}
+.rcbl{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.5);}
+.rcbl b{color:rgba(255,255,255,.85);}
+.rcbt{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}
+.rcbf{height:100%;border-radius:3px;transition:width .6s;}
+.rcb-sky{background:linear-gradient(90deg,var(--sky),var(--skyl));}
+.rcb-gold{background:linear-gradient(90deg,var(--gold),var(--goldb));}
+.rcb-grn{background:linear-gradient(90deg,var(--green),#16A34A);}
+.tier-tbl{margin:10px 11px;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+.tt-h{padding:10px 12px;background:linear-gradient(135deg,var(--navy),var(--nm));font-family:'Oswald',sans-serif;font-size:11px;font-weight:700;color:#fff;letter-spacing:.5px;text-transform:uppercase;}
+.tt-r{display:flex;align-items:center;padding:9px 12px;border-bottom:1px solid var(--border);gap:8px;}
+.tt-r:last-child{border-bottom:none;}
+.tt-r.cur{background:rgba(139,92,246,.04);}
+.tt-ico{font-size:16px;width:22px;text-align:center;flex-shrink:0;}
+.tt-tier{font-size:11px;font-weight:700;color:var(--navy);min-width:58px;}
+.tt-req{font-size:9px;color:var(--muted);flex:1;line-height:1.4;}
+.tt-rew{font-size:9px;font-weight:600;color:var(--green);text-align:right;white-space:nowrap;}
+.pmenu{padding:10px 11px;}
+.pmi{background:#fff;border-radius:8px;padding:10px 11px;margin-bottom:6px;display:flex;align-items:center;gap:9px;cursor:pointer;border:1px solid var(--border);}
+.pmi:active{background:var(--off);}
+.pmico{width:32px;height:32px;border-radius:7px;background:var(--off);display:flex;align-items:center;justify-content:center;font-size:15px;}
+.pmlbl{font-size:12px;font-weight:500;color:var(--navy);}
+.pmarr{margin-left:auto;font-size:14px;color:var(--muted);}
+/* BNAV */
+.bnav{position:absolute;bottom:0;left:0;right:0;height:62px;background:#fff;border-top:1px solid var(--border);display:none;grid-template-columns:repeat(5,1fr);z-index:100;}
+.bnav.show{display:grid;}
+.nb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;cursor:pointer;padding:0;}
+.nb-ico{font-size:19px;transition:transform .15s;}
+.nb-lbl{font-size:7px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);}
+.nb.on .nb-ico{transform:scale(1.15);}
+.nb.on .nb-lbl{color:var(--sky);font-weight:700;}
+.nbc{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--sky),var(--nm));display:flex;align-items:center;justify-content:center;font-size:19px;margin-top:-12px;box-shadow:0 4px 14px rgba(58,171,220,.4);}
+.nbw{position:relative;}
+.nbdot{position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--red);border:2px solid #fff;font-size:7px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;}
+/* TOAST */
+.toast{position:absolute;top:52px;left:11px;right:11px;background:var(--navy);border-radius:9px;padding:9px 13px;display:flex;align-items:center;gap:9px;z-index:300;opacity:0;pointer-events:none;transform:translateY(-6px);transition:all .3s;border:1px solid rgba(58,171,220,.3);}
+.toast.on{opacity:1;transform:translateY(0);}
+.t-ico{font-size:17px;}
+.t-msg{font-size:11px;color:#fff;font-weight:500;}
+.t-sub{font-size:9px;color:rgba(255,255,255,.45);}
+.map-m{margin:10px 12px;height:96px;background:linear-gradient(135deg,#162040,#0E2A4A);border-radius:9px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.map-g{position:absolute;inset:0;background-image:linear-gradient(rgba(58,171,220,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(58,171,220,.07) 1px,transparent 1px);background-size:16px 16px;}
+.mtrk{font-size:17px;animation:trk 3s ease-in-out infinite;position:relative;z-index:1;}
+@keyframes trk{0%,100%{transform:translateX(-22px)}50%{transform:translateX(22px)}}
+.p16{height:16px;}
+</style>
+</head>
+<body>
+<div class="phone" id="PHONE">
+  <div class="notch"></div>
+  <div class="sbar"><span class="sbar-time" id="CLK">9:41</span><div class="sbar-icons"><span>●●●</span><span>WiFi</span><span>🔋</span></div></div>
+
+  <!-- LOGIN -->
+  <div id="sc-login" style="position:absolute;top:44px;left:0;right:0;bottom:0;display:flex;background:linear-gradient(160deg,#0E1A45,#1A2A6C);flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;overflow-y:auto;">
+    <div class="l-ico">🚛</div>
+    <div class="l-title">TARA MOVING</div>
+    <div class="l-sub">Crew App · Foreman Edition</div>
+    <div class="l-hint">
+      <p>👤 User: <b>admin</b> &nbsp; 🔑 Pass: <b>admin</b></p>
+      <p>👤 User: <b>tara</b> &nbsp;&nbsp; 🔑 Pass: <b>tara123</b></p>
+      <small>Tap Sign In after entering credentials above</small>
+    </div>
+    <div class="lf"><label>Username</label><input type="text" id="U" placeholder="e.g. admin" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/></div>
+    <div class="lf"><label>Password</label><input type="password" id="P" placeholder="e.g. admin"/></div>
+    <button class="l-btn" onclick="tryLogin()">Sign In to Crew App →</button>
+    <div class="l-err" id="lErr">Wrong credentials — try admin / admin</div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="screen" id="sc-dash">
+    <div class="ah"><div class="ah-l"><span style="font-size:20px;">🚛</span><div><div class="ah-title">TARA MOVING</div><div class="ah-sub">Foreman Dashboard</div></div></div><div class="ah-r"><div class="bell" onclick="toast('New job tomorrow 9am','Coordinator Sarah')">🔔<div class="bdot"></div></div><div class="ava">JR</div></div></div>
+    <div class="dhero">
+      <div class="ddate">THURSDAY, MAY 7, 2026</div>
+      <div class="dname">Good morning, Jose 👋</div>
+      <div class="dflags"><div class="flag fg"><span class="pulse"></span>On Duty</div><div class="flag fd">💎 Diamond Tier</div></div>
+    </div>
+    <div class="srow">
+      <div class="sbox"><div class="sn">3</div><div class="sl">Today's Jobs</div><div class="ss">▲ On track</div></div>
+      <div class="sbox"><div class="sn">8,420</div><div class="sl">Cu.Ft. Month</div><div class="ss">↑ 12%</div></div>
+      <div class="sbox"><div class="sn">4.9★</div><div class="sl">Rating</div><div class="ss">0 claims</div></div>
+    </div>
+    <div class="sh"><h3>Today's Jobs</h3><a onclick="go('sc-sched','NB_S')">View Schedule</a></div>
+    <div class="jc" onclick="go('sc-job','NB_J')">
+      <div class="jc-top"><div class="jc-id">#TM-2847-A · 8:00 AM</div><div class="bdg b-done">✓ Done</div></div>
+      <div class="jc-bd"><div class="jc-nm">Rodriguez Family</div><div class="jc-ad">📍 123 W 45th St, Manhattan<br/><b>→ 456 Atlantic Ave, Brooklyn</b></div><div class="tags"><div class="tg">🛏️ 2 Bed</div><div class="tg">📦 Full Pack</div><div class="tg">580 cu.ft.</div></div></div>
+      <div class="jc-ft"><div><div class="jp">$1,350</div><div class="jcf">Completed · Signed</div></div><button class="obtn">View</button></div>
+    </div>
+    <div class="jc" style="border-color:rgba(58,171,220,.4);" onclick="go('sc-job','NB_J')">
+      <div class="jc-top"><div class="jc-id">#TM-2847-B · 12:00 PM</div><div class="bdg b-act">● Active</div></div>
+      <div class="jc-bd"><div class="jc-nm">Kim Household</div><div class="jc-ad">📍 789 Columbus Ave, UWS NY<br/><b>→ 321 Grove St, Jersey City NJ</b></div><div class="tags"><div class="tg">🛏️ 3 Bed</div><div class="tg">🎹 Piano</div><div class="tg">✨ White Glove</div><div class="tg">920 cu.ft.</div></div></div>
+      <div class="jc-ft"><div><div class="jp">$2,280</div><div class="jcf">In progress</div></div><button class="obtn">Open Job</button></div>
+    </div>
+    <div class="jc" onclick="go('sc-job','NB_J')">
+      <div class="jc-top"><div class="jc-id">#TM-2847-C · 4:00 PM</div><div class="bdg b-pend">⏳ Upcoming</div></div>
+      <div class="jc-bd"><div class="jc-nm">Castro Apartment</div><div class="jc-ad">📍 555 Grand Concourse, Bronx<br/><b>→ 88 Market St, Newark NJ</b></div><div class="tags"><div class="tg">🛏️ 1 Bed</div><div class="tg">📦 Packing</div><div class="tg">340 cu.ft.</div></div></div>
+      <div class="jc-ft"><div><div class="jp">$950</div><div class="jcf">Confirmed</div></div><button class="obtn">View</button></div>
+    </div>
+    <div class="p16"></div>
+  </div>
+
+  <!-- JOB DETAIL -->
+  <div class="screen" id="sc-job" style="background:#fff;">
+    <div class="jdhero">
+      <div class="bk" onclick="go('sc-dash','NB_H')">← Dashboard</div>
+      <div class="jd-id">#TM-2847-B · White Glove · 920 cu.ft.</div>
+      <div class="jd-nm">Kim Household</div>
+      <div class="bdg b-act" id="JBDG">● In Progress</div>
+    </div>
+    <div class="prog">
+      <div class="pg-lbl">Move Progress</div>
+      <div class="pg-steps">
+        <div class="ps"><div class="pd dn" id="p1">✓</div><div class="pl-lbl">Confirmed</div></div>
+        <div class="pl dn" id="pl1"></div>
+        <div class="ps"><div class="pd dn" id="p2">✓</div><div class="pl-lbl">Arrived</div></div>
+        <div class="pl dn" id="pl2"></div>
+        <div class="ps"><div class="pd ac" id="p3">🔄</div><div class="pl-lbl ac">Loading</div></div>
+        <div class="pl" id="pl3"></div>
+        <div class="ps"><div class="pd" id="p4">4</div><div class="pl-lbl">Transit</div></div>
+        <div class="pl" id="pl4"></div>
+        <div class="ps"><div class="pd" id="p5">5</div><div class="pl-lbl">Delivered</div></div>
+      </div>
+    </div>
+    <div class="map-m"><div class="map-g"></div><div style="position:absolute;left:32px;top:50%;transform:translateY(-50%);font-size:18px;">📍</div><div style="position:absolute;left:44px;right:44px;top:50%;height:2px;background:linear-gradient(90deg,var(--green),var(--sky));transform:translateY(-50%);border-radius:2px;"></div><div class="mtrk">🚛</div><div style="position:absolute;right:32px;top:50%;transform:translateY(-50%);font-size:18px;">🏁</div><div style="position:absolute;bottom:5px;right:9px;font-size:8px;color:rgba(255,255,255,.35);">LIVE TRACKING</div></div>
+    <div class="iblk">
+      <div class="ib-t">Client Information</div>
+      <div class="ir"><div class="ir-i">👤</div><div><div class="ir-l">Client</div><div class="ir-v">James Kim &amp; Family</div></div></div>
+      <div class="ir"><div class="ir-i">📞</div><div><div class="ir-l">Phone</div><div class="ir-v"><a href="tel:+12125550199">(212) 555-0199 — Tap to call</a></div></div></div>
+      <div class="ir"><div class="ir-i">📍</div><div><div class="ir-l">Pickup</div><div class="ir-v">789 Columbus Ave, 12F · Elevator ✓</div></div></div>
+      <div class="ir"><div class="ir-i">🏁</div><div><div class="ir-l">Delivery</div><div class="ir-v">321 Grove St, 2B, Jersey City NJ · 2nd Fl</div></div></div>
+      <div class="ir"><div class="ir-i">💰</div><div><div class="ir-l">Value</div><div class="ir-v" style="color:var(--green);font-weight:700;">$2,280 — Flat-Fee Guaranteed</div></div></div>
+    </div>
+    <div class="cuft-bx">
+      <div class="cbt">Cubic Feet Tracker</div>
+      <div class="cbn"><div><div class="cbig">920</div><div style="font-size:9px;color:var(--muted);">cu.ft. total</div></div><div class="cbd">3 Bedrooms<br/>White Glove<br/>Piano incl.</div></div>
+      <div class="ctr"><div class="cfil"></div></div>
+      <div class="csub"><span>0</span><b>598 cu.ft. loaded (65%)</b><span>920</span></div>
+    </div>
+    <div class="iblk" style="border-bottom:none;"><div class="ib-t">Inventory Checklist</div></div>
+    <div class="igrid">
+      <div class="ii"><div class="ii-n">King Bed Frame</div><div class="ii-c">42 cu.ft.</div><div class="ii-row"><span></span><div class="ick on" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''">✓</div></div></div>
+      <div class="ii"><div class="ii-n">Queen Mattress</div><div class="ii-c">38 cu.ft.</div><div class="ii-row"><span></span><div class="ick on" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''">✓</div></div></div>
+      <div class="ii"><div class="ii-n">3-Seat Sofa</div><div class="ii-c">55 cu.ft.</div><div class="ii-row"><span></span><div class="ick on" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''">✓</div></div></div>
+      <div class="ii"><div class="ii-n">Dining Table</div><div class="ii-c">28 cu.ft.</div><div class="ii-row"><span></span><div class="ick" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''"></div></div></div>
+      <div class="ii"><div class="ii-n">Upright Piano</div><div class="ii-c">32 cu.ft.</div><div class="ii-row"><span></span><div class="ick" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''"></div></div></div>
+      <div class="ii"><div class="ii-n">65" TV</div><div class="ii-c">18 cu.ft.</div><div class="ii-row"><span></span><div class="ick" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''"></div></div></div>
+      <div class="ii"><div class="ii-n">Wardrobe ×2</div><div class="ii-c">64 cu.ft.</div><div class="ii-row"><span></span><div class="ick on" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''">✓</div></div></div>
+      <div class="ii"><div class="ii-n">Boxes ×40</div><div class="ii-c">200 cu.ft.</div><div class="ii-row"><span></span><div class="ick on" onclick="this.classList.toggle('on');this.textContent=this.classList.contains('on')?'✓':''">✓</div></div></div>
+    </div>
+    <div class="iblk"><div class="ib-t">Special Services</div></div>
+    <div class="svctags"><div class="st t-pu">✨ White Glove</div><div class="st t-go">🎹 Piano Move</div><div class="st t-gr">📄 COI Ready</div><div class="st t-sk">📦 Full Pack</div></div>
+    <div class="iblk"><div class="ib-t">Coordinator Chat</div></div>
+    <div class="chatwrap" id="CHATW">
+      <div class="cb cbi"><div class="ct">Kim job at noon. Piano needs extra care — 3 helpers confirmed. COI sent to building. ✅</div><div class="ctm">Sarah · Coordinator · 8:15 AM</div></div>
+      <div class="cb cbo"><div class="ct">Copy that. Team ready 👍</div><div class="ctm">You · 10:42 AM</div></div>
+      <div class="cb cbi"><div class="ct">Client notified, they're waiting for you!</div><div class="ctm">Sarah · 10:45 AM</div></div>
+    </div>
+    <div class="csr"><input class="ci" id="CHATI" type="text" placeholder="Message coordinator..."/><button class="csnd" onclick="sendMsg()">➤</button></div>
+
+    <!-- SIGNATURES -->
+    <div class="sig-panel">
+      <div class="sig-ph"><div class="sig-ph-t">📋 e-BOL Signatures</div><div class="sig-ph-s sp-pend" id="SIG_S">Pending</div></div>
+      <div class="sig-body">
+        <div class="sig-slbl">🟢 WORK START — Both parties confirm work begins</div>
+        <div class="sig-row">
+          <div class="sig-box">
+            <div class="sig-bh">Client</div>
+            <div class="sig-bb">
+              <div class="sig-area" id="W_CS" onclick="sign('CS',this)"><div class="sig-ph-txt"><span style="font-size:14px;">✍️</span><br/>Tap to sign</div></div>
+              <input class="sig-inp" id="CS_I" placeholder="Client initials" maxlength="5"/>
+              <div class="sig-t" id="CS_T"></div>
+            </div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-bh">Foreman</div>
+            <div class="sig-bb">
+              <div class="sig-area" id="W_FS" onclick="sign('FS',this)"><div class="sig-ph-txt"><span style="font-size:14px;">✍️</span><br/>Tap to sign</div></div>
+              <input class="sig-inp" id="FS_I" placeholder="Foreman initials" maxlength="5"/>
+              <div class="sig-t" id="FS_T"></div>
+            </div>
+          </div>
+        </div>
+        <button class="sig-btn sig-btn-bl" id="BTN_S" onclick="confirmStart()">Confirm START &amp; Record Time →</button>
+        <div id="SD_BOX" style="display:none;"><div class="sig-done-card"><div class="sdc-t">✅ Work Started — Time Officially Recorded</div><div class="sdc-tm" id="SD_TIME"></div><div class="sdc-i" id="SD_INIT"></div></div></div>
+        <div class="sig-div"></div>
+        <div class="sig-slbl">🔴 WORK COMPLETE — Both parties confirm delivery</div>
+        <div class="sig-row">
+          <div class="sig-box">
+            <div class="sig-bh">Client</div>
+            <div class="sig-bb">
+              <div class="sig-area" id="W_CE" onclick="sign('CE',this)"><div class="sig-ph-txt"><span style="font-size:14px;">✍️</span><br/>Tap to sign</div></div>
+              <input class="sig-inp" id="CE_I" placeholder="Client initials" maxlength="5"/>
+              <div class="sig-t" id="CE_T"></div>
+            </div>
+          </div>
+          <div class="sig-box">
+            <div class="sig-bh">Foreman</div>
+            <div class="sig-bb">
+              <div class="sig-area" id="W_FE" onclick="sign('FE',this)"><div class="sig-ph-txt"><span style="font-size:14px;">✍️</span><br/>Tap to sign</div></div>
+              <input class="sig-inp" id="FE_I" placeholder="Foreman initials" maxlength="5"/>
+              <div class="sig-t" id="FE_T"></div>
+            </div>
+          </div>
+        </div>
+        <button class="sig-btn sig-btn-gr" id="BTN_E" onclick="confirmEnd()">Confirm COMPLETE &amp; Submit e-BOL →</button>
+        <div id="ED_BOX" style="display:none;"><div class="sig-done-card"><div class="sdc-t">✅ Job Closed — e-BOL Submitted Successfully</div><div class="sdc-tm" id="ED_TIME"></div><div class="sdc-i" id="ED_INIT"></div></div></div>
+      </div>
+    </div>
+
+    <div class="actrow">
+      <button class="ab ab-wh" onclick="alert('📞 Calling James Kim...\n(212) 555-0199')">📞 Call Client</button>
+      <button class="ab ab-wh" onclick="toast('Photo added to report','3 photos total')">📸 Add Photo</button>
+      <button class="ab ab-bl" onclick="nextSt()">🔄 Update Status</button>
+      <button class="ab ab-gr" onclick="markComplete()">✅ Mark Complete</button>
+      <button class="ab ab-gd" onclick="submitBOL()">📋 Submit e-BOL &amp; Close Job</button>
+    </div>
+    <div class="p16"></div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="screen" id="sc-sched">
+    <div class="ah"><div class="ah-l"><span style="font-size:19px;">📅</span><div><div class="ah-title">SCHEDULE</div><div class="ah-sub">May 2026</div></div></div><div class="ah-r"><div class="ava">JR</div></div></div>
+    <div class="calr"><div class="cday"><div class="cd-d">MON</div><div class="cd-n">4</div></div><div class="cday"><div class="cd-d">TUE</div><div class="cd-n">5</div></div><div class="cday hs"><div class="cd-d">WED</div><div class="cd-n">6</div></div><div class="cday ac hs"><div class="cd-d">THU</div><div class="cd-n">7</div></div><div class="cday hs"><div class="cd-d">FRI</div><div class="cd-n">8</div></div><div class="cday"><div class="cd-d">SAT</div><div class="cd-n">9</div></div><div class="cday"><div class="cd-d">SUN</div><div class="cd-n">10</div></div></div>
+    <div style="padding:9px 11px 3px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Thursday May 7 — 3 Jobs</div>
+    <div class="jc" onclick="go('sc-job','NB_J')"><div class="jc-top"><div class="jc-id">#TM-2847-A · 8:00 AM</div><div class="bdg b-done">✓ Done</div></div><div class="jc-bd"><div class="jc-nm">Rodriguez Family</div><div class="jc-ad">Manhattan → Brooklyn · 2BR · $1,350</div></div></div>
+    <div class="jc" style="border-color:rgba(58,171,220,.35);" onclick="go('sc-job','NB_J')"><div class="jc-top"><div class="jc-id">#TM-2847-B · 12:00 PM</div><div class="bdg b-act">● Active</div></div><div class="jc-bd"><div class="jc-nm">Kim Household</div><div class="jc-ad">UWS → Jersey City · 3BR + Piano · $2,280</div></div></div>
+    <div class="jc" onclick="go('sc-job','NB_J')"><div class="jc-top"><div class="jc-id">#TM-2847-C · 4:00 PM</div><div class="bdg b-pend">⏳ Upcoming</div></div><div class="jc-bd"><div class="jc-nm">Castro Apartment</div><div class="jc-ad">Bronx → Newark NJ · 1BR · $950</div></div></div>
+    <div style="padding:9px 11px 3px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);">Friday May 8 — 2 Jobs</div>
+    <div class="jc"><div class="jc-top"><div class="jc-id">#TM-2901-A · 9:00 AM</div><div class="bdg b-pend">⏳ Confirmed</div></div><div class="jc-bd"><div class="jc-nm">Petrov Move</div><div class="jc-ad">Hoboken NJ → Queens NY · 2BR · $1,180</div></div></div>
+    <div class="jc"><div class="jc-top"><div class="jc-id">#TM-2901-B · 2:00 PM</div><div class="bdg b-pend">⏳ Confirmed</div></div><div class="jc-bd"><div class="jc-nm">Wong Office Move</div><div class="jc-ad">Midtown Manhattan · 15 Desks · $3,200</div></div></div>
+    <div class="p16"></div>
+  </div>
+
+  <!-- EARNINGS -->
+  <div class="screen" id="sc-earn">
+    <div class="ah"><div class="ah-l"><span style="font-size:19px;">💰</span><div><div class="ah-title">EARNINGS</div><div class="ah-sub">Jose Rivera</div></div></div><div class="ah-r"><div class="ava">JR</div></div></div>
+    <div class="ehero"><div class="ehl">This Week</div><div class="eha">$1,840</div><div class="ehp">May 5 – May 11, 2026</div></div>
+    <div class="egrid"><div class="ec"><div class="ecl">This Month</div><div class="ecv">$6,240</div><div class="ecs">↑ 12%</div></div><div class="ec"><div class="ecl">Jobs Done</div><div class="ecv">24</div><div class="ecs">This month</div></div><div class="ec"><div class="ecl">Rating</div><div class="ecv">4.9★</div><div class="ecs">Last 30 days</div></div><div class="ec"><div class="ecl">Tips</div><div class="ecv">$340</div><div class="ecs">This month</div></div></div>
+    <div class="eli"><div class="ell">Recent Payments</div>
+      <div class="ei"><div class="eii eig">💵</div><div><div class="einm">Rodriguez Family</div><div class="eidt">May 7</div></div><div class="eiamt">+$180</div></div>
+      <div class="ei"><div class="eii eib">💵</div><div><div class="einm">Lopez White Glove</div><div class="eidt">May 6</div></div><div class="eiamt">+$240</div></div>
+      <div class="ei"><div class="eii eig">💵</div><div><div class="einm">Wong Office Move</div><div class="eidt">May 5</div></div><div class="eiamt">+$320</div></div>
+      <div class="ei"><div class="eii eig">🎁</div><div><div class="einm">Tip — Kim Household</div><div class="eidt">Pending</div></div><div class="eiamt" style="color:var(--orange);">+$80</div></div>
+    </div>
+    <div style="margin:0 11px 14px;background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(26,42,108,.1));border:1px solid rgba(139,92,246,.3);border-radius:10px;padding:12px 14px;"><div style="font-size:11px;font-weight:700;color:#C4B5FD;margin-bottom:4px;">💎 Diamond Tier Bonus — May 2026</div><div style="font-size:12px;color:rgba(255,255,255,.7);">You qualify for the <b style="color:#C4B5FD;">$500 monthly bonus</b><br/>8,420 cu.ft. · 4.9★ · 0 claims. Paid June 1st.</div></div>
+    <div class="p16"></div>
+  </div>
+
+  <!-- PROFILE -->
+  <div class="screen" id="sc-prof">
+    <div class="ah"><div class="ah-l"><span style="font-size:19px;">👤</span><div><div class="ah-title">PROFILE</div><div class="ah-sub">My Account</div></div></div><div class="ah-r"><div class="ava">JR</div></div></div>
+    <div class="phero"><div class="pav">JR</div><div class="pnm">Jose Rivera</div><div class="pro">Lead Foreman · Team Alpha · FRM-1</div><div class="pbdg"><span class="pulse"></span>Active · On Duty</div></div>
+    <div class="pgrid"><div class="pgc"><div class="pgn">247</div><div class="pgl">Total Moves</div></div><div class="pgc"><div class="pgn">4.9★</div><div class="pgl">Rating</div></div><div class="pgc"><div class="pgn">3yr</div><div class="pgl">With Tara</div></div></div>
+    <div class="rcard">
+      <div class="rc-top"><div class="rc-lbl">My Rank &amp; Tier</div><div class="rc-tier">💎 DIAMOND</div></div>
+      <div class="rc-main"><div class="rc-ico">💎</div><div><div class="rc-n">#1</div><div class="rc-nl">Company-wide ranking</div><div class="rc-bonus">🏆 $500 monthly bonus earned</div></div></div>
+      <div class="rc-bars">
+        <div class="rcb"><div class="rcbl"><span>Cu.Ft. This Month</span><b>8,420 / 9,000</b></div><div class="rcbt"><div class="rcbf rcb-sky" style="width:94%;"></div></div></div>
+        <div class="rcb"><div class="rcbl"><span>Rating Score</span><b>4.9 / 5.0</b></div><div class="rcbt"><div class="rcbf rcb-gold" style="width:98%;"></div></div></div>
+        <div class="rcb"><div class="rcbl"><span>Claims (lower = better)</span><b>0 claims ✓</b></div><div class="rcbt"><div class="rcbf rcb-grn" style="width:100%;"></div></div></div>
+      </div>
+    </div>
+    <div class="tier-tbl">
+      <div class="tt-h">Tier Requirements &amp; Incentives</div>
+      <div class="tt-r cur"><div class="tt-ico">💎</div><div class="tt-tier" style="color:#8B5CF6;">Diamond</div><div class="tt-req">8,000+ cu.ft · 4.9★ · 0 claims</div><div class="tt-rew">$500/mo ✓</div></div>
+      <div class="tt-r"><div class="tt-ico">🥇</div><div class="tt-tier">Gold</div><div class="tt-req">5,000+ cu.ft · 4.7★ · ≤1 claim</div><div class="tt-rew">$200/mo</div></div>
+      <div class="tt-r"><div class="tt-ico">🥈</div><div class="tt-tier">Silver</div><div class="tt-req">3,000+ cu.ft · 4.5★ · ≤2 claims</div><div class="tt-rew">$75/mo</div></div>
+      <div class="tt-r"><div class="tt-ico">🥉</div><div class="tt-tier">Bronze</div><div class="tt-req">1,000+ cu.ft · 4.2★ · ≤3 claims</div><div class="tt-rew">Standard</div></div>
+      <div class="tt-r"><div class="tt-ico">⬇️</div><div class="tt-tier" style="color:var(--red);">Demotion</div><div class="tt-req">Below targets or 4+ claims</div><div class="tt-rew" style="color:var(--red);">Review</div></div>
+    </div>
+    <div class="pmenu">
+      <div class="pmi" onclick="go('sc-earn','NB_E')"><div class="pmico">💰</div><div class="pmlbl">Earnings &amp; Payments</div><div class="pmarr">›</div></div>
+      <div class="pmi"><div class="pmico">📋</div><div class="pmlbl">Job History</div><div class="pmarr">›</div></div>
+      <div class="pmi"><div class="pmico">⭐</div><div class="pmlbl">My Reviews</div><div class="pmarr">›</div></div>
+      <div class="pmi"><div class="pmico">📄</div><div class="pmlbl">Certifications</div><div class="pmarr">›</div></div>
+      <div class="pmi"><div class="pmico">🔔</div><div class="pmlbl">Notifications</div><div class="pmarr">›</div></div>
+      <div class="pmi" onclick="logout()"><div class="pmico">🚪</div><div class="pmlbl" style="color:var(--red);">Sign Out</div><div class="pmarr">›</div></div>
+    </div>
+    <div class="p16"></div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav" id="BNAV">
+    <button class="nb on" id="NB_H" onclick="go('sc-dash','NB_H')"><span class="nb-ico">🏠</span><span class="nb-lbl">Home</span></button>
+    <button class="nb" id="NB_S" onclick="go('sc-sched','NB_S')"><div class="nbw"><span class="nb-ico">📅</span><div class="nbdot">3</div></div><span class="nb-lbl">Schedule</span></button>
+    <button class="nb" id="NB_J" onclick="go('sc-job','NB_J')" style="margin-top:-10px;"><div class="nbc">📦</div><span class="nb-lbl">Active Job</span></button>
+    <button class="nb" id="NB_E" onclick="go('sc-earn','NB_E')"><span class="nb-ico">💰</span><span class="nb-lbl">Earnings</span></button>
+    <button class="nb" id="NB_P" onclick="go('sc-prof','NB_P')"><span class="nb-ico">👤</span><span class="nb-lbl">Profile</span></button>
+  </div>
+
+  <div class="toast" id="TOAST"><span class="t-ico">🔔</span><div><div class="t-msg" id="T_M"></div><div class="t-sub" id="T_S"></div></div></div>
+</div>
+
+<div style="text-align:center;margin-top:14px;font-size:11px;color:rgba(255,255,255,.3);font-family:'DM Sans',sans-serif;">TARA MOVING · Crew App · Foreman Edition</div>
+
+<script>
+// CLOCK
+(function clk(){var n=new Date(),h=n.getHours(),m=n.getMinutes();document.getElementById('CLK').textContent=h+':'+(m<10?'0':'')+m;setTimeout(clk,1000);})();
+
+// TOAST
+var _t;
+function toast(m,s){var el=document.getElementById('TOAST');document.getElementById('T_M').textContent=m;document.getElementById('T_S').textContent=s||'Tara Moving';el.classList.add('on');clearTimeout(_t);_t=setTimeout(function(){el.classList.remove('on');},3000);}
+
+// NAV
+function go(sc,nb){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('show');});
+  var e=document.getElementById(sc);if(e){e.style.display='block';e.classList.add('show');e.scrollTop=0;}
+  document.querySelectorAll('.nb').forEach(function(b){b.classList.remove('on');});
+  var b=document.getElementById(nb);if(b)b.classList.add('on');
+}
+
+// LOGIN — using onclick in HTML so it fires regardless of load timing
+function tryLogin(){
+  var u=(document.getElementById('U').value||'').trim().toLowerCase();
+  var p=(document.getElementById('P').value||'').trim();
+  if((u==='admin'&&p==='admin')||(u==='tara'&&p==='tara123')||(u==='demo'&&p==='demo')||(u==='jose'&&p==='tara2024')){
+    document.getElementById('sc-login').style.display='none';
+    document.getElementById('BNAV').classList.add('show');
+    go('sc-dash','NB_H');
+    toast('Welcome back, Jose! 👋','3 jobs today · 💎 Diamond tier');
+  } else {
+    var err=document.getElementById('lErr');
+    err.style.display='block';
+    setTimeout(function(){err.style.display='none';},3000);
+  }
+}
+
+// ENTER KEY LOGIN
+document.getElementById('P').onkeydown=function(e){if(e.key==='Enter')tryLogin();};
+document.getElementById('U').onkeydown=function(e){if(e.key==='Enter')document.getElementById('P').focus();};
+
+// PROGRESS
+var pSt=3,pL=['Confirmed','Arrived','Loading','In Transit','Delivered'],pI=['✓','✓','🔄','🚛','✅'];
+function nextSt(){
+  if(pSt>=5){toast('Job at final step','Mark Complete to close');return;}
+  pSt++;
+  for(var i=1;i<=5;i++){var d=document.getElementById('p'+i);if(i<pSt){d.className='pd dn';d.textContent='✓';}else if(i===pSt){d.className='pd ac';d.textContent=pI[i-1];}else{d.className='pd';d.textContent=i;}if(i<5){var l=document.getElementById('pl'+i);l.className=i<pSt?'pl dn':'pl';}}
+  document.getElementById('JBDG').textContent='● '+pL[pSt-1];
+  toast('Status: '+pL[pSt-1],'Client notified automatically');
+}
+function markComplete(){document.getElementById('JBDG').textContent='✓ Completed';document.getElementById('JBDG').className='bdg b-done';toast('Job marked complete!','Sign e-BOL to close');}
+function submitBOL(){if(!SIG.eOK){toast('Complete all 4 signatures first','e-BOL requires START + END');return;}alert('✅ e-BOL Submitted!\n\nJob: Kim Household #TM-2847-B\nValue: $2,280 · Cu.Ft: 920\nStatus: CLOSED\n\nCoordinator notified. +920 cu.ft. added to rank. Great work! 💪');}
+
+// SIGNATURES
+var SIG={CS:false,FS:false,CE:false,FE:false,sOK:false,eOK:false};
+var SN={CS:'J. Kim',FS:'J. Rivera',CE:'J. Kim',FE:'J. Rivera'};
+function gts(){var n=new Date();return n.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})+' · '+n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function sign(id,el){
+  if(SIG[id])return;
+  SIG[id]=true;
+  el.classList.add('signed');
+  el.innerHTML='<div class="sig-done-txt">'+SN[id]+' ✓</div>';
+  document.getElementById(id+'_T').textContent='Signed: '+gts();
+  toast(SN[id]+' signed','Signature captured ✓');
+}
+function confirmStart(){
+  if(!SIG.CS||!SIG.FS){toast('Both signatures required','Client AND Foreman must sign');return;}
+  var ci=document.getElementById('CS_I').value.trim(),fi=document.getElementById('FS_I').value.trim();
+  if(!ci||!fi){toast('Enter initials for both','Required for e-BOL');return;}
+  SIG.sOK=true;
+  var ts=gts();
+  document.getElementById('SD_TIME').textContent='Start Time: '+ts;
+  document.getElementById('SD_INIT').textContent='Client: '+ci.toUpperCase()+' · Foreman: '+fi.toUpperCase();
+  document.getElementById('SD_BOX').style.display='block';
+  document.getElementById('BTN_S').style.display='none';
+  document.getElementById('SIG_S').className='sig-ph-s sp-part';
+  document.getElementById('SIG_S').textContent='Start ✓ · End Pending';
+  toast('Work officially started! ⏱️','Time: '+ts);
+}
+function confirmEnd(){
+  if(!SIG.sOK){toast('Complete START signatures first','Step 1 must be done');return;}
+  if(!SIG.CE||!SIG.FE){toast('Both signatures required','Client AND Foreman must sign');return;}
+  var ci=document.getElementById('CE_I').value.trim(),fi=document.getElementById('FE_I').value.trim();
+  if(!ci||!fi){toast('Enter initials for both','Required to close e-BOL');return;}
+  SIG.eOK=true;
+  var ts=gts();
+  document.getElementById('ED_TIME').textContent='End Time: '+ts;
+  document.getElementById('ED_INIT').textContent='Client: '+ci.toUpperCase()+' · Foreman: '+fi.toUpperCase();
+  document.getElementById('ED_BOX').style.display='block';
+  document.getElementById('BTN_E').style.display='none';
+  document.getElementById('SIG_S').className='sig-ph-s sp-done';
+  document.getElementById('SIG_S').textContent='✅ e-BOL Complete';
+  document.getElementById('JBDG').textContent='✓ Completed';
+  document.getElementById('JBDG').className='bdg b-done';
+  toast('e-BOL submitted! Job closed ✅','+920 cu.ft. added to rank score');
+}
+
+// CHAT
+function sendMsg(){
+  var i=document.getElementById('CHATI'),t=i.value.trim();
+  if(!t)return;
+  var n=new Date(),tm=n.getHours()+':'+(n.getMinutes()<10?'0':'')+n.getMinutes();
+  var b=document.createElement('div');b.className='cb cbo';
+  b.innerHTML='<div class="ct">'+t+'</div><div class="ctm">You · '+tm+'</div>';
+  document.getElementById('CHATW').appendChild(b);
+  b.scrollIntoView({behavior:'smooth'});
+  i.value='';
+  setTimeout(function(){toast('Delivered','Coordinator Sarah');},700);
+}
+document.getElementById('CHATI').onkeydown=function(e){if(e.key==='Enter')sendMsg();};
+
+// LOGOUT
+function logout(){if(confirm('Sign out of Tara Crew App?')){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('show');});document.getElementById('BNAV').classList.remove('show');var l=document.getElementById('sc-login');l.style.display='flex';document.getElementById('U').value='';document.getElementById('P').value='';}}
+</script>
+</body>
+</html>
